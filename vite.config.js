@@ -26,7 +26,7 @@ export default defineConfig({
     cors: true,
   },
   build: {
-    outDir: "build",
+    outDir: "dist",
     minify: "esbuild",
     sourcemap: false,
     rollupOptions: {
