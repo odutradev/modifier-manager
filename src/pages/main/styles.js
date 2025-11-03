@@ -1,0 +1,510 @@
+import styled from 'styled-components';
+
+export const Container = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0d1117;
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+`;
+
+export const Header = styled.header`
+  height: 60px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+`;
+
+export const Title = styled.h1`
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #58a6ff;
+`;
+
+export const UploadLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #238636;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2ea043;
+  }
+`;
+
+export const UploadIcon = styled.span`
+  font-size: 16px;
+`;
+
+export const FileInput = styled.input`
+  display: none;
+`;
+
+export const Content = styled.main`
+  flex: 1;
+  display: grid;
+  grid-template-columns: 250px 1fr 350px;
+  overflow: hidden;
+`;
+
+export const Sidebar = styled.aside`
+  background: #0d1117;
+  border-right: 1px solid #30363d;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+  }
+`;
+
+export const SidebarTitle = styled.h2`
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b949e;
+  margin: 0;
+  padding: 16px 16px 8px;
+`;
+
+export const FileList = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const FileItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: ${props => props.active ? '#58a6ff' : '#c9d1d9'};
+  background: ${props => props.active ? '#1f6feb1a' : 'transparent'};
+  border-left: 2px solid ${props => props.active ? '#58a6ff' : 'transparent'};
+  transition: all 0.2s;
+
+  &:hover {
+    background: #161b22;
+  }
+`;
+
+export const FileIcon = styled.span`
+  font-size: 14px;
+`;
+
+export const Editor = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: #0d1117;
+`;
+
+export const EditorHeader = styled.div`
+  height: 40px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+`;
+
+export const FilePath = styled.span`
+  font-size: 12px;
+  color: #8b949e;
+  font-family: 'Courier New', monospace;
+`;
+
+export const ActionButton = styled.button`
+  padding: 6px 12px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #30363d;
+    border-color: #8b949e;
+  }
+`;
+
+export const CodeArea = styled.textarea`
+  flex: 1;
+  padding: 16px;
+  background: #0d1117;
+  border: none;
+  color: #c9d1d9;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+
+  &::selection {
+    background: #58a6ff40;
+  }
+
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 6px;
+  }
+`;
+
+export const Panel = styled.aside`
+  background: #0d1117;
+  border-left: 1px solid #30363d;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+export const PanelHeader = styled.div`
+  height: 40px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+`;
+
+export const PanelTitle = styled.h2`
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8b949e;
+  margin: 0;
+`;
+
+export const ExportButton = styled.button`
+  padding: 4px 10px;
+  background: #238636;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2ea043;
+  }
+`;
+
+export const InstructionList = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+  }
+`;
+
+export const InstructionCard = styled.div`
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #8b949e;
+  }
+`;
+
+export const InstructionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+`;
+
+export const ActionBadge = styled.span`
+  padding: 4px 8px;
+  background: #388bfd26;
+  border: 1px solid #388bfd;
+  border-radius: 4px;
+  color: #58a6ff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+export const RemoveButton = styled.button`
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #da3633;
+    color: white;
+  }
+`;
+
+export const InstructionPath = styled.div`
+  font-size: 11px;
+  color: #8b949e;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 4px;
+`;
+
+export const InstructionDetail = styled.div`
+  font-size: 12px;
+  color: #c9d1d9;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: #0d1117;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+`;
+
+export const ModalContent = styled.div`
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+  }
+`;
+
+export const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #30363d;
+`;
+
+export const ModalTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #c9d1d9;
+`;
+
+export const CloseButton = styled.button`
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #30363d;
+    color: #c9d1d9;
+  }
+`;
+
+export const Form = styled.div`
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const Field = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const Label = styled.label`
+  font-size: 13px;
+  font-weight: 600;
+  color: #c9d1d9;
+`;
+
+export const Input = styled.input`
+  padding: 8px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #58a6ff;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+export const Select = styled.select`
+  padding: 8px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #58a6ff;
+  }
+
+  option {
+    background: #161b22;
+  }
+`;
+
+export const Textarea = styled.textarea`
+  padding: 8px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  resize: vertical;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #58a6ff;
+  }
+`;
+
+export const ButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+`;
+
+export const CancelButton = styled.button`
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #30363d;
+  }
+`;
+
+export const AddButton = styled.button`
+  padding: 8px 16px;
+  background: #238636;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2ea043;
+  }
+`;
