@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import JSZip from 'jszip';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { githubDark } from '@uiw/codemirror-theme-github';
 import * as S from './styles';
 
 const ModifierActions = {
@@ -33,6 +36,8 @@ const CodeEditor = () => {
   useEffect(() => {
     if (currentFile && files[currentFile]) {
       setContent(files[currentFile]);
+    } else if (!currentFile) {
+      setContent('');
     }
   }, [currentFile, files]);
 
@@ -44,19 +49,42 @@ const CodeEditor = () => {
     const contents = await zip.loadAsync(file);
     const newFiles = {};
 
+    const filePaths = Object.keys(contents.files).filter(path => !contents.files[path].dir && !path.startsWith('__MACOSX'));
+    
+    if (filePaths.length === 0) return;
+
+    const firstPathParts = filePaths[0].split('/');
+    let rootPrefix = '';
+    if (firstPathParts.length > 1) {
+      const potentialRoot = firstPathParts[0] + '/';
+      if (filePaths.every(p => p.startsWith(potentialRoot))) {
+        rootPrefix = potentialRoot;
+      }
+    }
+
     for (const [path, zipEntry] of Object.entries(contents.files)) {
-      if (!zipEntry.dir) {
-        const content = await zipEntry.async('text');
-        newFiles[path] = content;
+      if (!zipEntry.dir && !path.startsWith('__MACOSX')) {
+        const fileContent = await zipEntry.async('text');
+        const normalizedPath = path.startsWith(rootPrefix)
+          ? path.substring(rootPrefix.length)
+          : path;
+        
+        if(normalizedPath) {
+          newFiles[normalizedPath] = fileContent;
+        }
       }
     }
 
     setFiles(newFiles);
     const firstFile = Object.keys(newFiles)[0];
-    if (firstFile) setCurrentFile(firstFile);
+    if (firstFile) {
+      setCurrentFile(firstFile);
+    } else {
+      setCurrentFile(null);
+    }
   };
 
-  const handleTextSelect = (e) => {
+  const handleTextSelect = () => {
     const selection = window.getSelection();
     const selected = selection.toString();
     if (selected) {
@@ -70,8 +98,7 @@ const CodeEditor = () => {
     }
   };
 
-  const handleContentChange = (e) => {
-    const newContent = e.target.value;
+  const handleContentChange = (newContent) => {
     setContent(newContent);
     setFiles(prev => ({
       ...prev,
@@ -263,17 +290,31 @@ const CodeEditor = () => {
         <S.Editor>
           <S.EditorHeader>
             <S.FilePath>{currentFile || 'No file selected'}</S.FilePath>
-            <S.ActionButton onClick={() => setShowBuilder(true)}>
+            <S.ActionButton 
+              onClick={() => setShowBuilder(true)}
+              disabled={!currentFile}
+            >
               + New Instruction
             </S.ActionButton>
           </S.EditorHeader>
-          <S.CodeArea
-            value={content}
-            onChange={handleContentChange}
-            onMouseUp={handleTextSelect}
-            spellCheck={false}
-            placeholder="Select a file to edit..."
-          />
+          
+          <S.CodeEditorWrapper onMouseUp={handleTextSelect}>
+            <CodeMirror
+              value={content}
+              onChange={handleContentChange}
+              theme={githubDark}
+              extensions={[javascript({ jsx: true })]}
+              height="100%"
+              readOnly={!currentFile}
+              basicSetup={{
+                lineNumbers: true,
+                foldGutter: true,
+                autocompletion: true,
+                bracketMatching: true,
+              }}
+            />
+          </S.CodeEditorWrapper>
+
         </S.Editor>
 
         <S.Panel>

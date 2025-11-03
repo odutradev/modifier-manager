@@ -108,6 +108,10 @@ export const FileItem = styled.div`
   background: ${props => props.active ? '#1f6feb1a' : 'transparent'};
   border-left: 2px solid ${props => props.active ? '#58a6ff' : 'transparent'};
   transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
 
   &:hover {
     background: #161b22;
@@ -116,12 +120,14 @@ export const FileItem = styled.div`
 
 export const FileIcon = styled.span`
   font-size: 14px;
+  flex-shrink: 0;
 `;
 
 export const Editor = styled.div`
   display: flex;
   flex-direction: column;
   background: #0d1117;
+  overflow: hidden;
 `;
 
 export const EditorHeader = styled.div`
@@ -132,12 +138,16 @@ export const EditorHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  flex-shrink: 0;
 `;
 
 export const FilePath = styled.span`
   font-size: 12px;
   color: #8b949e;
   font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const ActionButton = styled.button`
@@ -150,42 +160,50 @@ export const ActionButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
 
   &:hover {
     background: #30363d;
     border-color: #8b949e;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
-export const CodeArea = styled.textarea`
+export const CodeEditorWrapper = styled.div`
   flex: 1;
-  padding: 16px;
-  background: #0d1117;
-  border: none;
-  color: #c9d1d9;
-  font-family: 'Courier New', 'Consolas', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  resize: none;
-  outline: none;
+  overflow: auto;
+  position: relative;
 
-  &::selection {
-    background: #58a6ff40;
+  .cm-editor {
+    height: 100%;
+    font-size: 14px;
+    font-family: 'Courier New', 'Consolas', monospace;
   }
 
-  &::-webkit-scrollbar {
-    width: 12px;
+  .cm-scroller {
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 6px;
+    }
   }
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #30363d;
-    border-radius: 6px;
+  .cm-selectionBackground {
+    background: #58a6ff40 !important;
   }
 `;
+
 
 export const Panel = styled.aside`
   background: #0d1117;
@@ -203,6 +221,7 @@ export const PanelHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  flex-shrink: 0;
 `;
 
 export const PanelTitle = styled.h2`
@@ -306,6 +325,9 @@ export const InstructionPath = styled.div`
   color: #8b949e;
   font-family: 'Courier New', monospace;
   margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const InstructionDetail = styled.div`
@@ -342,20 +364,8 @@ export const ModalContent = styled.div`
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #30363d;
-    border-radius: 4px;
-  }
+  display: flex;
+  flex-direction: column;
 `;
 
 export const ModalHeader = styled.div`
@@ -398,6 +408,20 @@ export const Form = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+  }
 `;
 
 export const Field = styled.div`
@@ -429,6 +453,7 @@ export const Input = styled.input`
 
   &:disabled {
     opacity: 0.5;
+    background: #21262d;
     cursor: not-allowed;
   }
 `;
@@ -462,6 +487,7 @@ export const Textarea = styled.textarea`
   font-size: 14px;
   font-family: 'Courier New', monospace;
   resize: vertical;
+  min-height: 80px;
   transition: all 0.2s;
 
   &:focus {
@@ -475,6 +501,8 @@ export const ButtonGroup = styled.div`
   gap: 12px;
   justify-content: flex-end;
   margin-top: 8px;
+  border-top: 1px solid #30363d;
+  padding-top: 16px;
 `;
 
 export const CancelButton = styled.button`
