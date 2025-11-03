@@ -27,6 +27,44 @@ export const Title = styled.h1`
   color: #58a6ff;
 `;
 
+export const HeaderControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+export const ZipName = styled.span`
+  font-size: 14px;
+  color: #8b949e;
+  font-family: 'Courier New', monospace;
+`;
+
+export const ClearButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #b52a2a;
+    color: white;
+    border-color: #da3633;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 export const UploadLabel = styled.label`
   display: flex;
   align-items: center;
@@ -47,7 +85,10 @@ export const UploadLabel = styled.label`
 `;
 
 export const UploadIcon = styled.span`
-  font-size: 16px;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: text-bottom;
 `;
 
 export const FileInput = styled.input`
@@ -121,6 +162,8 @@ export const FileItem = styled.div`
 export const FileIcon = styled.span`
   font-size: 14px;
   flex-shrink: 0;
+  width: 14px;
+  height: 14px;
 `;
 
 export const Editor = styled.div`
@@ -151,6 +194,9 @@ export const FilePath = styled.span`
 `;
 
 export const ActionButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 12px;
   background: #21262d;
   border: 1px solid #30363d;
@@ -170,6 +216,11 @@ export const ActionButton = styled.button`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
   }
 `;
 
@@ -233,7 +284,40 @@ export const PanelTitle = styled.h2`
   margin: 0;
 `;
 
+export const PanelActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const PreviewButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #1f6feb;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #388bfd;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
 export const ExportButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
   background: #238636;
   border: none;
@@ -246,6 +330,11 @@ export const ExportButton = styled.button`
 
   &:hover {
     background: #2ea043;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
   }
 `;
 
@@ -275,6 +364,7 @@ export const InstructionCard = styled.div`
   padding: 12px;
   margin-bottom: 8px;
   transition: all 0.2s;
+  cursor: pointer;
 
   &:hover {
     border-color: #8b949e;
@@ -313,6 +403,12 @@ export const RemoveButton = styled.button`
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s;
+  flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 
   &:hover {
     background: #da3633;
@@ -366,6 +462,13 @@ export const ModalContent = styled.div`
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+`;
+
+export const PreviewModalContent = styled(ModalContent)`
+  width: 90vw;
+  max-width: 1400px;
+  height: 90vh;
 `;
 
 export const ModalHeader = styled.div`
@@ -374,6 +477,7 @@ export const ModalHeader = styled.div`
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
 `;
 
 export const ModalTitle = styled.h2`
@@ -389,13 +493,18 @@ export const CloseButton = styled.button`
   background: transparent;
   border: none;
   color: #8b949e;
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 
   &:hover {
     background: #30363d;
@@ -502,7 +611,8 @@ export const ButtonGroup = styled.div`
   justify-content: flex-end;
   margin-top: 8px;
   border-top: 1px solid #30363d;
-  padding-top: 16px;
+  padding: 16px 24px 20px;
+  flex-shrink: 0;
 `;
 
 export const CancelButton = styled.button`
@@ -534,5 +644,74 @@ export const AddButton = styled.button`
 
   &:hover {
     background: #2ea043;
+  }
+`;
+
+export const JsonViewerWrapper = styled.div`
+  height: 400px;
+  overflow: auto;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  margin: 0 24px 16px;
+
+  .cm-editor {
+    height: 100%;
+  }
+`;
+
+export const DownloadButton = styled(AddButton)``;
+
+export const CopyButton = styled(AddButton)`
+  background: #1f6feb;
+  &:hover {
+    background: #388bfd;
+  }
+`;
+
+export const PreviewModalBody = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+export const PreviewWarning = styled.div`
+  padding: 12px 16px;
+  background: #3a3a1a;
+  border-bottom: 1px solid #c9ae3d;
+  color: #e6dbb9;
+  font-size: 13px;
+  flex-shrink: 0;
+`;
+
+export const PreviewLayout = styled.div`
+  flex: 1;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  overflow: hidden;
+`;
+
+export const PreviewEditor = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  
+  .cm-editor {
+    height: 100% !important;
+  }
+
+  .cm-scroller {
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 6px;
+    }
   }
 `;

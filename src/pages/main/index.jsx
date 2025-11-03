@@ -5,6 +5,16 @@ import { javascript } from '@codemirror/lang-javascript';
 import { githubDark } from '@uiw/codemirror-theme-github';
 import * as S from './styles';
 
+const ICONS = {
+  UPLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>',
+  FILE: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/></svg>',
+  TRASH: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>',
+  CLOSE: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
+  DOWNLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>',
+  PREVIEW: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>',
+  PLUS: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/></svg>'
+};
+
 const ModifierActions = {
   CREATE_FILE: 'CREATE_FILE',
   DELETE_FILE: 'DELETE_FILE',
@@ -16,22 +26,36 @@ const ModifierActions = {
   INSERT_PROP: 'INSERT_PROP'
 };
 
+const defaultInstructionState = {
+  action: ModifierActions.INSERT_AFTER,
+  path: '',
+  content: '',
+  pattern: '',
+  replacement: '',
+  componentName: '',
+  propName: '',
+  propValue: ''
+};
+
 const CodeEditor = () => {
   const [files, setFiles] = useState({});
+  const [zipName, setZipName] = useState(null);
   const [currentFile, setCurrentFile] = useState(null);
   const [content, setContent] = useState('');
   const [selectedText, setSelectedText] = useState('');
   const [instructions, setInstructions] = useState([]);
+  
   const [showBuilder, setShowBuilder] = useState(false);
-  const [newInstruction, setNewInstruction] = useState({
-    action: ModifierActions.INSERT_AFTER,
-    content: '',
-    pattern: '',
-    replacement: '',
-    componentName: '',
-    propName: '',
-    propValue: ''
-  });
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [newInstruction, setNewInstruction] = useState(defaultInstructionState);
+  
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [jsonContent, setJsonContent] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewFiles, setPreviewFiles] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
 
   useEffect(() => {
     if (currentFile && files[currentFile]) {
@@ -45,6 +69,7 @@ const CodeEditor = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setZipName(file.name);
     const zip = new JSZip();
     const contents = await zip.loadAsync(file);
     const newFiles = {};
@@ -76,12 +101,21 @@ const CodeEditor = () => {
     }
 
     setFiles(newFiles);
+    setInstructions([]);
     const firstFile = Object.keys(newFiles)[0];
     if (firstFile) {
       setCurrentFile(firstFile);
     } else {
       setCurrentFile(null);
     }
+    e.target.value = null; 
+  };
+  
+  const handleClear = () => {
+    setFiles({});
+    setCurrentFile(null);
+    setZipName(null);
+    setInstructions([]);
   };
 
   const handleTextSelect = () => {
@@ -89,13 +123,24 @@ const CodeEditor = () => {
     const selected = selection.toString();
     if (selected) {
       setSelectedText(selected);
-      setShowBuilder(true);
       setNewInstruction(prev => ({
-        ...prev,
+        ...defaultInstructionState,
+        path: currentFile,
         pattern: selected,
-        content: ''
+        action: ModifierActions.INSERT_AFTER,
       }));
+      setEditingIndex(null);
+      setShowBuilder(true);
     }
+  };
+  
+  const handleOpenInstructionBuilder = () => {
+    setNewInstruction(prev => ({
+      ...defaultInstructionState,
+      path: currentFile,
+    }));
+    setEditingIndex(null);
+    setShowBuilder(true);
   };
 
   const handleContentChange = (newContent) => {
@@ -106,11 +151,15 @@ const CodeEditor = () => {
     }));
   };
 
-  const addInstruction = () => {
-    if (!currentFile) return;
+  const handleCloseModal = () => {
+    setShowBuilder(false);
+    setEditingIndex(null);
+    setNewInstruction(defaultInstructionState);
+  };
 
+  const addInstruction = () => {
     const instruction = {
-      path: currentFile,
+      path: newInstruction.path,
       action: newInstruction.action,
       ...(newInstruction.content && { content: newInstruction.content }),
       ...(newInstruction.pattern && { pattern: newInstruction.pattern }),
@@ -119,33 +168,115 @@ const CodeEditor = () => {
       ...(newInstruction.propName && { propName: newInstruction.propName }),
       ...(newInstruction.propValue && { propValue: newInstruction.propValue })
     };
-
-    setInstructions(prev => [...prev, instruction]);
-    setShowBuilder(false);
+    
+    if (editingIndex !== null) {
+      setInstructions(prev => prev.map((item, i) => i === editingIndex ? instruction : item));
+    } else {
+      setInstructions(prev => [...prev, instruction]);
+    }
+    
+    handleCloseModal();
+  };
+  
+  const handleEditInstruction = (index) => {
+    const inst = instructions[index];
     setNewInstruction({
-      action: ModifierActions.INSERT_AFTER,
-      content: '',
-      pattern: '',
-      replacement: '',
-      componentName: '',
-      propName: '',
-      propValue: ''
+      ...defaultInstructionState,
+      ...inst,
     });
+    setEditingIndex(index);
+    setShowBuilder(true);
   };
 
-  const removeInstruction = (index) => {
+  const removeInstruction = (e, index) => {
+    e.stopPropagation(); 
     setInstructions(prev => prev.filter((_, i) => i !== index));
   };
 
-  const exportInstructions = () => {
+  const handleExportClick = () => {
     const json = JSON.stringify({ instructions }, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    setJsonContent(json);
+    setShowExportModal(true);
+  };
+
+  const handleDownloadJson = () => {
+    const blob = new Blob([jsonContent], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'modifier-instructions.json';
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleCopyJson = () => {
+    navigator.clipboard.writeText(jsonContent).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handlePreview = () => {
+    let modifiedFiles = { ...files };
+
+    for (const inst of instructions) {
+      const path = inst.path;
+      if (!path) continue;
+
+      try {
+        switch (inst.action) {
+          case ModifierActions.CREATE_FILE:
+            modifiedFiles[path] = inst.content || '';
+            break;
+            
+          case ModifierActions.DELETE_FILE:
+            delete modifiedFiles[path];
+            break;
+            
+          case ModifierActions.INSERT_IMPORT:
+            if (modifiedFiles[path] !== undefined) {
+              modifiedFiles[path] = `${inst.content}\n${modifiedFiles[path]}`;
+            }
+            break;
+            
+          case ModifierActions.APPEND_TO_FILE:
+            if (modifiedFiles[path] !== undefined) {
+              modifiedFiles[path] += `\n${inst.content}`;
+            }
+            break;
+            
+          case ModifierActions.INSERT_AFTER:
+            if (modifiedFiles[path] !== undefined && inst.pattern) {
+              modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(`${inst.pattern}\n${inst.content}`);
+            }
+            break;
+            
+          case ModifierActions.INSERT_BEFORE:
+            if (modifiedFiles[path] !== undefined && inst.pattern) {
+              modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(`${inst.content}\n${inst.pattern}`);
+            }
+            break;
+            
+          case ModifierActions.REPLACE_CONTENT:
+            if (modifiedFiles[path] !== undefined && inst.pattern) {
+              modifiedFiles[path] = modifiedFiles[path].replace(new RegExp(inst.pattern, 'g'), inst.replacement || '');
+            }
+            break;
+
+          // INSERT_PROP is omitted as it requires AST parsing, which is not available.
+          
+          default:
+            break;
+        }
+      } catch (error) {
+        console.error("Error applying instruction:", inst, error);
+      }
+    }
+    
+    setPreviewFiles(modifiedFiles);
+    const firstFile = Object.keys(modifiedFiles).length > 0 ? Object.keys(modifiedFiles)[0] : null;
+    setPreviewFile(firstFile);
+    setShowPreviewModal(true);
   };
 
   const getActionFields = () => {
@@ -253,6 +384,9 @@ const CodeEditor = () => {
             </S.Field>
           </>
         );
+        
+      case ModifierActions.DELETE_FILE:
+        return null; 
       
       default:
         return null;
@@ -263,24 +397,36 @@ const CodeEditor = () => {
     <S.Container>
       <S.Header>
         <S.Title>Code Editor</S.Title>
-        <S.UploadLabel>
-          <S.UploadIcon>📦</S.UploadIcon>
-          Import ZIP
-          <S.FileInput type="file" accept=".zip" onChange={handleZipUpload} />
-        </S.UploadLabel>
+        <S.HeaderControls>
+          {zipName ? (
+            <>
+              <S.ZipName>{zipName}</S.ZipName>
+              <S.ClearButton onClick={handleClear}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.TRASH }} />
+                Clear
+              </S.ClearButton>
+            </>
+          ) : (
+            <S.UploadLabel>
+              <S.UploadIcon dangerouslySetInnerHTML={{ __html: ICONS.UPLOAD }} />
+              Import ZIP
+              <S.FileInput type="file" accept=".zip" onChange={handleZipUpload} />
+            </S.UploadLabel>
+          )}
+        </S.HeaderControls>
       </S.Header>
 
       <S.Content>
         <S.Sidebar>
           <S.SidebarTitle>Files</S.SidebarTitle>
           <S.FileList>
-            {Object.keys(files).map((path) => (
+            {Object.keys(files).sort().map((path) => (
               <S.FileItem
                 key={path}
                 active={path === currentFile}
                 onClick={() => setCurrentFile(path)}
               >
-                <S.FileIcon>📄</S.FileIcon>
+                <S.FileIcon dangerouslySetInnerHTML={{ __html: ICONS.FILE }} />
                 {path}
               </S.FileItem>
             ))}
@@ -291,10 +437,11 @@ const CodeEditor = () => {
           <S.EditorHeader>
             <S.FilePath>{currentFile || 'No file selected'}</S.FilePath>
             <S.ActionButton 
-              onClick={() => setShowBuilder(true)}
-              disabled={!currentFile}
+              onClick={handleOpenInstructionBuilder}
+              disabled={!currentFile && !Object.keys(files).length}
             >
-              + New Instruction
+              <span dangerouslySetInnerHTML={{ __html: ICONS.PLUS }} />
+              New Instruction
             </S.ActionButton>
           </S.EditorHeader>
           
@@ -321,19 +468,26 @@ const CodeEditor = () => {
           <S.PanelHeader>
             <S.PanelTitle>Instructions ({instructions.length})</S.PanelTitle>
             {instructions.length > 0 && (
-              <S.ExportButton onClick={exportInstructions}>
-                ⬇ Export JSON
-              </S.ExportButton>
+              <S.PanelActions>
+                <S.PreviewButton onClick={handlePreview}>
+                  <span dangerouslySetInnerHTML={{ __html: ICONS.PREVIEW }} />
+                  Preview
+                </S.PreviewButton>
+                <S.ExportButton onClick={handleExportClick}>
+                  <span dangerouslySetInnerHTML={{ __html: ICONS.DOWNLOAD }} />
+                  Export
+                </S.ExportButton>
+              </S.PanelActions>
             )}
           </S.PanelHeader>
 
           <S.InstructionList>
             {instructions.map((inst, index) => (
-              <S.InstructionCard key={index}>
+              <S.InstructionCard key={index} onClick={() => handleEditInstruction(index)}>
                 <S.InstructionHeader>
                   <S.ActionBadge>{inst.action}</S.ActionBadge>
-                  <S.RemoveButton onClick={() => removeInstruction(index)}>
-                    ✕
+                  <S.RemoveButton onClick={(e) => removeInstruction(e, index)}>
+                    <span dangerouslySetInnerHTML={{ __html: ICONS.TRASH }} />
                   </S.RemoveButton>
                 </S.InstructionHeader>
                 <S.InstructionPath>{inst.path}</S.InstructionPath>
@@ -346,11 +500,13 @@ const CodeEditor = () => {
       </S.Content>
 
       {showBuilder && (
-        <S.Modal onClick={() => setShowBuilder(false)}>
+        <S.Modal onClick={handleCloseModal}>
           <S.ModalContent onClick={(e) => e.stopPropagation()}>
             <S.ModalHeader>
-              <S.ModalTitle>New Instruction</S.ModalTitle>
-              <S.CloseButton onClick={() => setShowBuilder(false)}>✕</S.CloseButton>
+              <S.ModalTitle>{editingIndex !== null ? 'Edit Instruction' : 'New Instruction'}</S.ModalTitle>
+              <S.CloseButton onClick={handleCloseModal}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.CLOSE }} />
+              </S.CloseButton>
             </S.ModalHeader>
 
             <S.Form>
@@ -369,25 +525,109 @@ const CodeEditor = () => {
               <S.Field>
                 <S.Label>File Path</S.Label>
                 <S.Input
-                  value={currentFile || ''}
-                  disabled
+                  value={newInstruction.path || ''}
+                  onChange={(e) => setNewInstruction(prev => ({ ...prev, path: e.target.value }))}
+                  placeholder="path/to/file.js"
+                  disabled={![ModifierActions.CREATE_FILE, ModifierActions.DELETE_FILE].includes(newInstruction.action)}
                 />
               </S.Field>
 
               {getActionFields()}
 
-              <S.ButtonGroup>
-                <S.CancelButton onClick={() => setShowBuilder(false)}>
-                  Cancel
-                </S.CancelButton>
-                <S.AddButton onClick={addInstruction}>
-                  Add Instruction
-                </S.AddButton>
-              </S.ButtonGroup>
             </S.Form>
+            
+            <S.ButtonGroup>
+              <S.CancelButton onClick={handleCloseModal}>
+                Cancel
+              </S.CancelButton>
+              <S.AddButton onClick={addInstruction}>
+                {editingIndex !== null ? 'Update Instruction' : 'Add Instruction'}
+              </S.AddButton>
+            </S.ButtonGroup>
           </S.ModalContent>
         </S.Modal>
       )}
+      
+      {showExportModal && (
+        <S.Modal onClick={() => setShowExportModal(false)}>
+          <S.ModalContent onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>Export Instructions</S.ModalTitle>
+              <S.CloseButton onClick={() => setShowExportModal(false)}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.CLOSE }} />
+              </S.CloseButton>
+            </S.ModalHeader>
+            <S.JsonViewerWrapper>
+              <CodeMirror
+                value={jsonContent}
+                theme={githubDark}
+                extensions={[javascript({ jsx: true })]}
+                height="100%"
+                readOnly={true}
+              />
+            </S.JsonViewerWrapper>
+            <S.ButtonGroup>
+              <S.CancelButton onClick={() => setShowExportModal(false)}>
+                Close
+              </S.CancelButton>
+              <S.CopyButton onClick={handleCopyJson}>
+                {copied ? 'Copied!' : 'Copy to Clipboard'}
+              </S.CopyButton>
+              <S.DownloadButton onClick={handleDownloadJson}>
+                Download JSON
+              </S.DownloadButton>
+            </S.ButtonGroup>
+          </S.ModalContent>
+        </S.Modal>
+      )}
+      
+      {showPreviewModal && (
+        <S.Modal onClick={() => setShowPreviewModal(false)}>
+          <S.PreviewModalContent onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>Execution Preview</S.ModalTitle>
+              <S.CloseButton onClick={() => setShowPreviewModal(false)}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.CLOSE }} />
+              </S.CloseButton>
+            </S.ModalHeader>
+            <S.PreviewModalBody>
+              <S.PreviewWarning>
+                Note: This is a simulation. Unsupported actions (like INSERT_PROP) are not reflected.
+              </S.PreviewWarning>
+              <S.PreviewLayout>
+                <S.Sidebar>
+                  <S.SidebarTitle>Modified Files</S.SidebarTitle>
+                  <S.FileList>
+                    {previewFiles && Object.keys(previewFiles).sort().map((path) => (
+                      <S.FileItem
+                        key={path}
+                        active={path === previewFile}
+                        onClick={() => setPreviewFile(path)}
+                      >
+                        <S.FileIcon dangerouslySetInnerHTML={{ __html: ICONS.FILE }} />
+                        {path}
+                      </S.FileItem>
+                    ))}
+                  </S.FileList>
+                </S.Sidebar>
+                <S.PreviewEditor>
+                  <CodeMirror
+                    value={(previewFile && previewFiles[previewFile]) || ''}
+                    theme={githubDark}
+                    extensions={[javascript({ jsx: true })]}
+                    height="100%"
+                    readOnly={true}
+                    basicSetup={{
+                      lineNumbers: true,
+                    }}
+                  />
+                </S.PreviewEditor>
+              </S.PreviewLayout>
+            </S.PreviewModalBody>
+          </S.PreviewModalContent>
+        </S.Modal>
+      )}
+
     </S.Container>
   );
 };
