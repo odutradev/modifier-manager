@@ -752,8 +752,10 @@ export const PreviewLayout = styled.div`
 export const PreviewEditor = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  
+  overflow: auto;
+  position: relative;
+  min-height: 0;
+
   .cm-editor {
     height: 100% !important;
   }
