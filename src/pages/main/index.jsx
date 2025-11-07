@@ -10,10 +10,11 @@ const ICONS = {
   FILE: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/></svg>',
   TRASH: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>',
   CLOSE: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
-  DOWNLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>',
-  PREVIEW: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>',
+  DOWNLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>',
+  PREVIEW: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>',
   PLUS: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/></svg>',
-  IMPORT: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>'
+  IMPORT: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>',
+  MORE: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>'
 };
 
 const ModifierActions = {
@@ -57,6 +58,10 @@ const CodeEditor = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewFiles, setPreviewFiles] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
+
+  const [showMenu, setShowMenu] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importText, setImportText] = useState('');
 
   useEffect(() => {
     if (currentFile && files[currentFile]) {
@@ -198,6 +203,7 @@ const CodeEditor = () => {
     const json = JSON.stringify({ instructions }, null, 2);
     setJsonContent(json);
     setShowExportModal(true);
+    setShowMenu(false);
   };
 
   const handleDownloadJson = () => {
@@ -217,7 +223,7 @@ const CodeEditor = () => {
     });
   };
 
-  const handleImportInstructions = (e) => {
+  const handleImportFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -236,6 +242,28 @@ const CodeEditor = () => {
     };
     reader.readAsText(file);
     e.target.value = null;
+    setShowMenu(false);
+  };
+
+  const handleImportTextSubmit = () => {
+    try {
+      const json = JSON.parse(importText);
+      // Support both directly pasted instructions array or the export format { instructions: [] }
+      let newInstructions = [];
+      if (Array.isArray(json)) {
+         newInstructions = json;
+      } else if (json.instructions && Array.isArray(json.instructions)) {
+         newInstructions = json.instructions;
+      } else {
+        throw new Error('Invalid format');
+      }
+      
+      setInstructions(newInstructions);
+      setShowImportModal(false);
+      setImportText('');
+    } catch (error) {
+      alert('Invalid JSON. Please check your text.');
+    }
   };
 
   const handlePreview = () => {
@@ -297,6 +325,7 @@ const CodeEditor = () => {
     const firstFile = Object.keys(modifiedFiles).length > 0 ? Object.keys(modifiedFiles)[0] : null;
     setPreviewFile(firstFile);
     setShowPreviewModal(true);
+    setShowMenu(false);
   };
 
   const getActionFields = () => {
@@ -488,19 +517,36 @@ const CodeEditor = () => {
           <S.PanelHeader>
             <S.PanelTitle>Instructions ({instructions.length})</S.PanelTitle>
             <S.PanelActions>
-              <S.ImportLabel>
-                <span dangerouslySetInnerHTML={{ __html: ICONS.IMPORT }} />
-                Import
-                <S.FileInput type="file" accept=".json" onChange={handleImportInstructions} />
-              </S.ImportLabel>
-              <S.PreviewButton onClick={handlePreview} disabled={instructions.length === 0}>
-                <span dangerouslySetInnerHTML={{ __html: ICONS.PREVIEW }} />
-                Preview
-              </S.PreviewButton>
-              <S.ExportButton onClick={handleExportClick} disabled={instructions.length === 0}>
-                <span dangerouslySetInnerHTML={{ __html: ICONS.DOWNLOAD }} />
-                Export
-              </S.ExportButton>
+              <S.MenuContainer>
+                <S.MenuButton onClick={() => setShowMenu(!showMenu)} active={showMenu}>
+                   <span dangerouslySetInnerHTML={{ __html: ICONS.MORE }} />
+                </S.MenuButton>
+                {showMenu && (
+                  <>
+                    <S.MenuBackdrop onClick={() => setShowMenu(false)} />
+                    <S.MenuDropdown>
+                      <S.MenuItem onClick={handlePreview} disabled={instructions.length === 0}>
+                        <span dangerouslySetInnerHTML={{ __html: ICONS.PREVIEW }} />
+                        Preview
+                      </S.MenuItem>
+                      <S.MenuItem onClick={handleExportClick} disabled={instructions.length === 0}>
+                        <span dangerouslySetInnerHTML={{ __html: ICONS.DOWNLOAD }} />
+                        Export
+                      </S.MenuItem>
+                      <S.MenuSeparator />
+                      <S.MenuItem as="label">
+                        <span dangerouslySetInnerHTML={{ __html: ICONS.IMPORT }} />
+                        Import File
+                        <S.FileInput type="file" accept=".json" onChange={handleImportFile} />
+                      </S.MenuItem>
+                      <S.MenuItem onClick={() => { setShowImportModal(true); setShowMenu(false); }}>
+                        <span dangerouslySetInnerHTML={{ __html: ICONS.IMPORT }} />
+                        Import Text
+                      </S.MenuItem>
+                    </S.MenuDropdown>
+                  </>
+                )}
+              </S.MenuContainer>
             </S.PanelActions>
           </S.PanelHeader>
 
@@ -599,6 +645,39 @@ const CodeEditor = () => {
               <S.DownloadButton onClick={handleDownloadJson}>
                 Download JSON
               </S.DownloadButton>
+            </S.ButtonGroup>
+          </S.ModalContent>
+        </S.Modal>
+      )}
+
+      {showImportModal && (
+        <S.Modal onClick={() => setShowImportModal(false)}>
+          <S.ModalContent onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>Import Instructions (JSON Text)</S.ModalTitle>
+              <S.CloseButton onClick={() => setShowImportModal(false)}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.CLOSE }} />
+              </S.CloseButton>
+            </S.ModalHeader>
+            <S.Form>
+               <S.Field>
+                <S.Label>Paste JSON here</S.Label>
+                <S.Textarea
+                  value={importText}
+                  onChange={(e) => setImportText(e.target.value)}
+                  placeholder='{"instructions": [...]}'
+                  rows={15}
+                  style={{ fontFamily: 'monospace' }}
+                />
+              </S.Field>
+            </S.Form>
+            <S.ButtonGroup>
+              <S.CancelButton onClick={() => setShowImportModal(false)}>
+                Cancel
+              </S.CancelButton>
+              <S.AddButton onClick={handleImportTextSubmit} disabled={!importText.trim()}>
+                Import
+              </S.AddButton>
             </S.ButtonGroup>
           </S.ModalContent>
         </S.Modal>

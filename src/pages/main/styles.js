@@ -290,88 +290,95 @@ export const PanelActions = styled.div`
   gap: 8px;
 `;
 
-export const PreviewButton = styled.button`
+export const MenuContainer = styled.div`
+  position: relative;
+`;
+
+export const MenuButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: #1f6feb;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: ${props => props.active ? '#30363d' : 'transparent'};
   border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: 11px;
-  font-weight: 500;
+  border-radius: 6px;
+  color: #c9d1d9;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: #388bfd;
+    background: #30363d;
   }
+`;
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+export const MenuBackdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+`;
+
+export const MenuDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px #010409;
+  z-index: 100;
+  min-width: 180px;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const MenuItem = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  color: #c9d1d9;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  appearance: none;
+  margin: 0;
+  box-sizing: border-box;
+
+  &:hover:not(:disabled) {
     background: #1f6feb;
-  }
-
-  svg {
-    width: 12px;
-    height: 12px;
-  }
-`;
-
-export const ExportButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: #238636;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #2ea043;
+    color: white;
+    text-decoration: none;
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #238636;
   }
 
   svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
   }
 `;
 
-export const ImportLabel = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: #8957e5;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #9e70f0;
-  }
-
-  svg {
-    width: 12px;
-    height: 12px;
-  }
+export const MenuSeparator = styled.div`
+  height: 1px;
+  background: #30363d;
+  margin: 8px 0;
+  width: 100%;
 `;
 
 export const InstructionList = styled.div`
@@ -680,6 +687,12 @@ export const AddButton = styled.button`
 
   &:hover {
     background: #2ea043;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #238636;
   }
 `;
 
