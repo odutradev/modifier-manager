@@ -10,6 +10,15 @@ export const Container = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 `;
 
+export const Icon = styled.span.attrs({ className: 'material-icons' })`
+  font-size: 16px;
+  line-height: 1;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  user-select: none;
+`;
+
 export const Header = styled.header`
   height: 60px;
   background: #161b22;
@@ -59,17 +68,11 @@ export const ClearButton = styled.button`
     color: white;
     border-color: #da3633;
   }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 `;
 
 export const UploadLabel = styled.label`
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 8px 16px;
   background: #238636;
   border: none;
@@ -83,13 +86,6 @@ export const UploadLabel = styled.label`
   &:hover {
     background: #2ea043;
   }
-`;
-
-export const UploadIcon = styled.span`
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
 `;
 
 export const FileInput = styled.input`
@@ -179,27 +175,15 @@ export const FolderItem = styled(FileItem)`
   font-weight: 600;
 `;
 
-export const FileIcon = styled.span`
-  display: flex;
-  align-items: center;
+export const FileIcon = styled(Icon)`
+  font-size: 16px;
   color: #8b949e;
-  
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 `;
 
-export const ChevronIcon = styled.span`
-  display: flex;
-  align-items: center;
+export const ChevronIcon = styled(Icon)`
+  font-size: 16px;
   color: #8b949e;
   margin-right: 2px;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
 `;
 
 export const Editor = styled.div`
@@ -251,11 +235,6 @@ export const ActionButton = styled.button`
     cursor: not-allowed;
     background: #21262d;
     border: 1px solid #30363d;
-  }
-
-  svg {
-    width: 14px;
-    height: 14px;
   }
 `;
 
@@ -417,9 +396,8 @@ export const MenuItem = styled.button`
     cursor: not-allowed;
   }
 
-  svg {
-    width: 14px;
-    height: 14px;
+  ${Icon} {
+    font-size: 18px;
     opacity: 0.7;
   }
 `;
@@ -497,11 +475,6 @@ export const RemoveButton = styled.button`
   border-radius: 4px;
   transition: all 0.2s;
   flex-shrink: 0;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
 
   &:hover {
     background: #da3633;
@@ -593,11 +566,6 @@ export const CloseButton = styled.button`
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s;
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
 
   &:hover {
     background: #30363d;
