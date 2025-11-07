@@ -133,6 +133,7 @@ const CodeEditor = () => {
   const sidebarRef = useRef(null);
 
   const fileTree = useMemo(() => buildFileTree(files), [files]);
+  const previewFileTree = useMemo(() => previewFiles ? buildFileTree(previewFiles) : [], [previewFiles]);
 
   const startResizing = useCallback((e) => {
     e.preventDefault();
@@ -791,22 +792,18 @@ const CodeEditor = () => {
               </S.CloseButton>
             </S.ModalHeader>
             <S.PreviewModalBody>
-              <S.PreviewWarning>
-                Note: This is a simulation. Unsupported actions (like INSERT_PROP) are not reflected.
-              </S.PreviewWarning>
               <S.PreviewLayout>
                 <S.Sidebar>
                   <S.SidebarTitle>Modified Files</S.SidebarTitle>
                   <S.FileList>
-                    {previewFiles && Object.keys(previewFiles).sort().map((path) => (
-                      <S.FileItem
-                        key={path}
-                        active={path === previewFile}
-                        onClick={() => setPreviewFile(path)}
-                      >
-                        <S.Icon style={{ marginRight: 6, fontSize: 16 }}>{ICONS.FILE}</S.Icon>
-                        {path}
-                      </S.FileItem>
+                    {previewFileTree.map(item => (
+                      <FileTreeNode 
+                        key={item.path || item.name} 
+                        item={item} 
+                        level={0} 
+                        onSelect={setPreviewFile} 
+                        currentFile={previewFile} 
+                      />
                     ))}
                   </S.FileList>
                 </S.Sidebar>

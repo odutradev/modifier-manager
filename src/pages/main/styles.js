@@ -742,15 +742,6 @@ export const PreviewModalBody = styled.div`
   overflow: hidden;
 `;
 
-export const PreviewWarning = styled.div`
-  padding: 12px 16px;
-  background: #3a3a1a;
-  border-bottom: 1px solid #c9ae3d;
-  color: #e6dbb9;
-  font-size: 13px;
-  flex-shrink: 0;
-`;
-
 export const PreviewLayout = styled.div`
   flex: 1;
   display: grid;
