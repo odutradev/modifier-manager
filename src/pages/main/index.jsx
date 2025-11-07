@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import JSZip from 'jszip';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -8,6 +8,10 @@ import * as S from './styles';
 const ICONS = {
   UPLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>',
   FILE: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/></svg>',
+  FOLDER: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/></svg>',
+  FOLDER_OPEN: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/><path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-.5-.5H1a.5.5 0 0 0-.5.5v6zm14-7H1v1h14v-1z"/></svg>',
+  CHEVRON_RIGHT: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>',
+  CHEVRON_DOWN: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>',
   TRASH: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>',
   CLOSE: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
   DOWNLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>',
@@ -39,29 +43,122 @@ const defaultInstructionState = {
   propValue: ''
 };
 
+const buildFileTree = (files) => {
+  const root = [];
+  Object.keys(files).forEach(path => {
+    const parts = path.split('/');
+    let currentLevel = root;
+    parts.forEach((part, index) => {
+      const isFile = index === parts.length - 1;
+      let existingPath = currentLevel.find(item => item.name === part && item.type === (isFile ? 'file' : 'folder'));
+      if (!existingPath) {
+        const newItem = {
+          name: part,
+          type: isFile ? 'file' : 'folder',
+          path: isFile ? path : null,
+          children: isFile ? null : []
+        };
+        currentLevel.push(newItem);
+        existingPath = newItem;
+      }
+      currentLevel = existingPath.children;
+    });
+  });
+
+  const sortTree = (level) => {
+    level.sort((a, b) => {
+      if (a.type === 'folder' && b.type === 'file') return -1;
+      if (a.type === 'file' && b.type === 'folder') return 1;
+      return a.name.localeCompare(b.name);
+    });
+    level.forEach(item => {
+      if (item.type === 'folder') {
+        sortTree(item.children);
+      }
+    });
+  };
+
+  sortTree(root);
+  return root;
+};
+
+const FileTreeNode = ({ item, level, onSelect, currentFile }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const isSelected = item.path === currentFile;
+
+  if (item.type === 'folder') {
+    return (
+      <>
+        <S.FolderItem level={level} onClick={() => setIsOpen(!isOpen)}>
+          <S.ChevronIcon dangerouslySetInnerHTML={{ __html: isOpen ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT }} />
+          <S.FileIcon dangerouslySetInnerHTML={{ __html: isOpen ? ICONS.FOLDER_OPEN : ICONS.FOLDER }} />
+          {item.name}
+        </S.FolderItem>
+        {isOpen && item.children.map(child => (
+          <FileTreeNode key={child.path || child.name} item={child} level={level + 1} onSelect={onSelect} currentFile={currentFile} />
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <S.FileItem level={level} active={isSelected} onClick={() => onSelect(item.path)}>
+      <S.FileIcon dangerouslySetInnerHTML={{ __html: ICONS.FILE }} />
+      {item.name}
+    </S.FileItem>
+  );
+};
+
 const CodeEditor = () => {
   const [files, setFiles] = useState({});
   const [zipName, setZipName] = useState(null);
   const [currentFile, setCurrentFile] = useState(null);
   const [content, setContent] = useState('');
-  const [selectedText, setSelectedText] = useState('');
   const [instructions, setInstructions] = useState([]);
-  
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [newInstruction, setNewInstruction] = useState(defaultInstructionState);
-  
   const [showExportModal, setShowExportModal] = useState(false);
   const [jsonContent, setJsonContent] = useState('');
   const [copied, setCopied] = useState(false);
-
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewFiles, setPreviewFiles] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
-
   const [showMenu, setShowMenu] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importText, setImportText] = useState('');
+  const [sidebarWidth, setSidebarWidth] = useState(250);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef(null);
+
+  const fileTree = useMemo(() => buildFileTree(files), [files]);
+
+  const startResizing = useCallback((e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((mouseMoveEvent) => {
+    if (isResizing) {
+      const newWidth = mouseMoveEvent.clientX - sidebarRef.current.getBoundingClientRect().left;
+      if (newWidth > 150 && newWidth < 600) {
+        setSidebarWidth(newWidth);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
 
   useEffect(() => {
     if (currentFile && files[currentFile]) {
@@ -128,7 +225,6 @@ const CodeEditor = () => {
     const selection = window.getSelection();
     const selected = selection.toString();
     if (selected) {
-      setSelectedText(selected);
       setNewInstruction(prev => ({
         ...defaultInstructionState,
         path: currentFile,
@@ -248,12 +344,11 @@ const CodeEditor = () => {
   const handleImportTextSubmit = () => {
     try {
       const json = JSON.parse(importText);
-      // Support both directly pasted instructions array or the export format { instructions: [] }
       let newInstructions = [];
       if (Array.isArray(json)) {
-         newInstructions = json;
+          newInstructions = json;
       } else if (json.instructions && Array.isArray(json.instructions)) {
-         newInstructions = json.instructions;
+          newInstructions = json.instructions;
       } else {
         throw new Error('Invalid format');
       }
@@ -443,7 +538,7 @@ const CodeEditor = () => {
   };
 
   return (
-    <S.Container>
+    <S.Container ref={sidebarRef}>
       <S.Header>
         <S.Title>Code Editor</S.Title>
         <S.HeaderControls>
@@ -465,22 +560,24 @@ const CodeEditor = () => {
         </S.HeaderControls>
       </S.Header>
 
-      <S.Content>
-        <S.Sidebar>
-          <S.SidebarTitle>Files</S.SidebarTitle>
-          <S.FileList>
-            {Object.keys(files).sort().map((path) => (
-              <S.FileItem
-                key={path}
-                active={path === currentFile}
-                onClick={() => setCurrentFile(path)}
-              >
-                <S.FileIcon dangerouslySetInnerHTML={{ __html: ICONS.FILE }} />
-                {path}
-              </S.FileItem>
-            ))}
-          </S.FileList>
-        </S.Sidebar>
+      <S.Content style={{ gridTemplateColumns: `${sidebarWidth}px 1fr 350px` }}>
+        <S.SidebarContainer>
+          <S.Sidebar>
+            <S.SidebarTitle>Explorer</S.SidebarTitle>
+            <S.FileList>
+              {fileTree.map(item => (
+                <FileTreeNode 
+                  key={item.path || item.name} 
+                  item={item} 
+                  level={0} 
+                  onSelect={setCurrentFile} 
+                  currentFile={currentFile} 
+                />
+              ))}
+            </S.FileList>
+          </S.Sidebar>
+          <S.Resizer onMouseDown={startResizing} />
+        </S.SidebarContainer>
 
         <S.Editor>
           <S.EditorHeader>

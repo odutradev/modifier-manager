@@ -18,6 +18,7 @@ export const Header = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  flex-shrink: 0;
 `;
 
 export const Title = styled.h1`
@@ -98,13 +99,17 @@ export const FileInput = styled.input`
 export const Content = styled.main`
   flex: 1;
   display: grid;
-  grid-template-columns: 250px 1fr 350px;
+  overflow: hidden;
+`;
+
+export const SidebarContainer = styled.div`
+  display: flex;
   overflow: hidden;
 `;
 
 export const Sidebar = styled.aside`
+  flex: 1;
   background: #0d1117;
-  border-right: 1px solid #30363d;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -123,14 +128,25 @@ export const Sidebar = styled.aside`
   }
 `;
 
+export const Resizer = styled.div`
+  width: 5px;
+  background: transparent;
+  cursor: col-resize;
+  transition: background 0.2s;
+  border-right: 1px solid #30363d;
+
+  &:hover {
+    background: #58a6ff;
+  }
+`;
+
 export const SidebarTitle = styled.h2`
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
   color: #8b949e;
   margin: 0;
-  padding: 16px 16px 8px;
+  padding: 10px 16px;
 `;
 
 export const FileList = styled.div`
@@ -141,29 +157,49 @@ export const FileList = styled.div`
 export const FileItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 4px 16px;
+  padding-left: ${props => (props.level * 12 + 16) + 'px'};
   cursor: pointer;
   font-size: 13px;
-  color: ${props => props.active ? '#58a6ff' : '#c9d1d9'};
-  background: ${props => props.active ? '#1f6feb1a' : 'transparent'};
-  border-left: 2px solid ${props => props.active ? '#58a6ff' : 'transparent'};
-  transition: all 0.2s;
+  color: ${props => props.active ? '#c9d1d9' : '#8b949e'};
+  background: ${props => props.active ? '#30363d' : 'transparent'};
+  transition: all 0.1s;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
+  user-select: none;
 
   &:hover {
-    background: #161b22;
+    color: #c9d1d9;
+    background: ${props => props.active ? '#30363d' : '#161b22'};
   }
 `;
 
+export const FolderItem = styled(FileItem)`
+  color: #c9d1d9;
+  font-weight: 600;
+`;
+
 export const FileIcon = styled.span`
-  font-size: 14px;
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
+  display: flex;
+  align-items: center;
+  color: #8b949e;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+export const ChevronIcon = styled.span`
+  display: flex;
+  align-items: center;
+  color: #8b949e;
+  margin-right: 2px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 `;
 
 export const Editor = styled.div`
@@ -176,7 +212,6 @@ export const Editor = styled.div`
 export const EditorHeader = styled.div`
   height: 40px;
   background: #161b22;
-  border-bottom: 1px solid #30363d;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -185,9 +220,8 @@ export const EditorHeader = styled.div`
 `;
 
 export const FilePath = styled.span`
-  font-size: 12px;
-  color: #8b949e;
-  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #c9d1d9;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -197,11 +231,11 @@ export const ActionButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  background: #21262d;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  color: #c9d1d9;
+  padding: 4px 8px;
+  background: #238636;
+  border: none;
+  border-radius: 4px;
+  color: white;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -209,13 +243,14 @@ export const ActionButton = styled.button`
   flex-shrink: 0;
 
   &:hover {
-    background: #30363d;
-    border-color: #8b949e;
+    background: #2ea043;
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background: #21262d;
+    border: 1px solid #30363d;
   }
 
   svg {
@@ -232,12 +267,28 @@ export const CodeEditorWrapper = styled.div`
   .cm-editor {
     height: 100%;
     font-size: 14px;
-    font-family: 'Courier New', 'Consolas', monospace;
+    font-family: 'Consolas', 'Monaco', monospace;
+    background-color: #0d1117;
+  }
+
+  .cm-gutters {
+    background-color: #0d1117;
+    border-right: 1px solid #30363d;
+    color: #484f58;
+  }
+
+  .cm-activeLineGutter {
+    background-color: #161b22;
   }
 
   .cm-scroller {
     &::-webkit-scrollbar {
-      width: 12px;
+      width: 14px;
+      height: 14px;
+    }
+
+    &::-webkit-scrollbar-corner {
+      background: #161b22;
     }
 
     &::-webkit-scrollbar-track {
@@ -246,15 +297,15 @@ export const CodeEditorWrapper = styled.div`
 
     &::-webkit-scrollbar-thumb {
       background: #30363d;
-      border-radius: 6px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #484f58;
     }
   }
-
-  .cm-selectionBackground {
-    background: #58a6ff40 !important;
-  }
 `;
-
 
 export const Panel = styled.aside`
   background: #0d1117;
@@ -276,10 +327,9 @@ export const PanelHeader = styled.div`
 `;
 
 export const PanelTitle = styled.h2`
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
   color: #8b949e;
   margin: 0;
 `;
