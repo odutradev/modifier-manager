@@ -308,6 +308,12 @@ export const PreviewButton = styled.button`
     background: #388bfd;
   }
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #1f6feb;
+  }
+
   svg {
     width: 12px;
     height: 12px;
@@ -330,6 +336,36 @@ export const ExportButton = styled.button`
 
   &:hover {
     background: #2ea043;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #238636;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+export const ImportLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #8957e5;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #9e70f0;
   }
 
   svg {

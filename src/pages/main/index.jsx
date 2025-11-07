@@ -10,9 +10,10 @@ const ICONS = {
   FILE: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/></svg>',
   TRASH: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>',
   CLOSE: '<svg fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>',
-  DOWNLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>',
+  DOWNLOAD: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>',
   PREVIEW: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>',
-  PLUS: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/></svg>'
+  PLUS: '<svg fill="currentColor" viewBox="0 0 16 16" width="14" height="14"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/></svg>',
+  IMPORT: '<svg fill="currentColor" viewBox="0 0 16 16" width="12" height="12"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>'
 };
 
 const ModifierActions = {
@@ -216,6 +217,27 @@ const CodeEditor = () => {
     });
   };
 
+  const handleImportInstructions = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target.result);
+        if (json.instructions && Array.isArray(json.instructions)) {
+          setInstructions(json.instructions);
+        } else {
+          alert('Invalid instructions file format');
+        }
+      } catch (error) {
+        alert('Error parsing JSON file');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null;
+  };
+
   const handlePreview = () => {
     let modifiedFiles = { ...files };
 
@@ -262,8 +284,6 @@ const CodeEditor = () => {
               modifiedFiles[path] = modifiedFiles[path].replace(new RegExp(inst.pattern, 'g'), inst.replacement || '');
             }
             break;
-
-          // INSERT_PROP is omitted as it requires AST parsing, which is not available.
           
           default:
             break;
@@ -467,18 +487,21 @@ const CodeEditor = () => {
         <S.Panel>
           <S.PanelHeader>
             <S.PanelTitle>Instructions ({instructions.length})</S.PanelTitle>
-            {instructions.length > 0 && (
-              <S.PanelActions>
-                <S.PreviewButton onClick={handlePreview}>
-                  <span dangerouslySetInnerHTML={{ __html: ICONS.PREVIEW }} />
-                  Preview
-                </S.PreviewButton>
-                <S.ExportButton onClick={handleExportClick}>
-                  <span dangerouslySetInnerHTML={{ __html: ICONS.DOWNLOAD }} />
-                  Export
-                </S.ExportButton>
-              </S.PanelActions>
-            )}
+            <S.PanelActions>
+              <S.ImportLabel>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.IMPORT }} />
+                Import
+                <S.FileInput type="file" accept=".json" onChange={handleImportInstructions} />
+              </S.ImportLabel>
+              <S.PreviewButton onClick={handlePreview} disabled={instructions.length === 0}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.PREVIEW }} />
+                Preview
+              </S.PreviewButton>
+              <S.ExportButton onClick={handleExportClick} disabled={instructions.length === 0}>
+                <span dangerouslySetInnerHTML={{ __html: ICONS.DOWNLOAD }} />
+                Export
+              </S.ExportButton>
+            </S.PanelActions>
           </S.PanelHeader>
 
           <S.InstructionList>
