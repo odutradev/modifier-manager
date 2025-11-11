@@ -22,7 +22,7 @@
     "react-toastify": "^10.0.6",
     "styled-components": "^6.1.19",
     "vite-plugin-eslint": "^1.8.1",
-    "zeck-cli": "^1.2.9"
+    "zeck-cli": "^1.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
