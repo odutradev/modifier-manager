@@ -461,6 +461,20 @@ export const ActionBadge = styled.span`
   letter-spacing: 0.5px;
 `;
 
+export const ConditionBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #6e409826;
+  border: 1px solid #8957e5;
+  border-radius: 4px;
+  color: #bc8cff;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 8px;
+`;
+
 export const RemoveButton = styled.button`
   width: 20px;
   height: 20px;
@@ -774,4 +788,68 @@ export const PreviewEditor = styled.div`
       border-radius: 6px;
     }
   }
+`;
+
+export const ConditionsSection = styled.div`
+  margin-top: 8px;
+  padding: 16px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+`;
+
+export const ConditionsSectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+`;
+
+export const AddConditionButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #8957e526;
+  border: 1px solid #8957e5;
+  border-radius: 4px;
+  color: #bc8cff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #8957e540;
+  }
+`;
+
+export const ConditionsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+export const ConditionItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #8957e5;
+    background: #1c1f26;
+  }
+`;
+
+export const ConditionContent = styled.div`
+  font-size: 12px;
+  color: #c9d1d9;
+  font-family: 'Courier New', monospace;
 `;
