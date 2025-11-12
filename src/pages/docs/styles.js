@@ -382,3 +382,49 @@ export const FooterLink = styled.a`
     text-decoration: underline;
   }
 `;
+
+
+export const HeaderControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+export const LanguageToggle = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #238636;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    background: #2ea043;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+  }
+`;
+
+export const LanguageText = styled.span`
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;

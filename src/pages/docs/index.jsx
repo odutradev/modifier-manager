@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as S from './styles';
+import { translations } from './translations';
 
 const ICONS = {
   BACK: 'arrow_back',
@@ -8,13 +9,17 @@ const ICONS = {
   RULE: 'rule',
   LIGHTBULB: 'lightbulb',
   MENU: 'menu',
-  CLOSE: 'close'
+  CLOSE: 'close',
+  LANGUAGE: 'language'
 };
 
 const Docs = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('instructions');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [language, setLanguage] = useState('en');
+
+  const t = translations[language];
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -25,34 +30,44 @@ const Docs = () => {
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'pt' : 'en');
+  };
+
   return (
     <S.Container>
       <S.Header>
         <S.BackButton onClick={() => navigate('/')}>
           <S.Icon>{ICONS.BACK}</S.Icon>
-          Back to Editor
+          {t.backToEditor}
         </S.BackButton>
-        <S.Title>Documentation</S.Title>
-        <S.MobileMenuButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          <S.Icon>{mobileMenuOpen ? ICONS.CLOSE : ICONS.MENU}</S.Icon>
-        </S.MobileMenuButton>
+        <S.Title>{t.documentation}</S.Title>
+        <S.HeaderControls>
+          <S.LanguageToggle onClick={toggleLanguage}>
+            <S.Icon>{ICONS.LANGUAGE}</S.Icon>
+            <S.LanguageText>{language.toUpperCase()}</S.LanguageText>
+          </S.LanguageToggle>
+          <S.MobileMenuButton onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <S.Icon>{mobileMenuOpen ? ICONS.CLOSE : ICONS.MENU}</S.Icon>
+          </S.MobileMenuButton>
+        </S.HeaderControls>
       </S.Header>
 
       <S.Content>
         <S.Sidebar open={mobileMenuOpen}>
-          <S.SidebarTitle>Contents</S.SidebarTitle>
+          <S.SidebarTitle>{t.contents}</S.SidebarTitle>
           <S.NavList>
             <S.NavItem active={activeSection === 'instructions'} onClick={() => scrollToSection('instructions')}>
               <S.Icon>{ICONS.CODE}</S.Icon>
-              Instructions
+              {t.instructions}
             </S.NavItem>
             <S.NavItem active={activeSection === 'conditions'} onClick={() => scrollToSection('conditions')}>
               <S.Icon>{ICONS.RULE}</S.Icon>
-              Conditions
+              {t.conditions}
             </S.NavItem>
             <S.NavItem active={activeSection === 'examples'} onClick={() => scrollToSection('examples')}>
               <S.Icon>{ICONS.LIGHTBULB}</S.Icon>
-              Examples
+              {t.examples}
             </S.NavItem>
           </S.NavList>
         </S.Sidebar>
@@ -61,15 +76,15 @@ const Docs = () => {
           <S.Section id="instructions">
             <S.SectionTitle>
               <S.Icon>{ICONS.CODE}</S.Icon>
-              Instructions
+              {t.instructions}
             </S.SectionTitle>
             <S.Description>
-              Instructions define what actions should be performed on your code files. Each instruction specifies a target file and an action to execute.
+              {t.instructionsDescription}
             </S.Description>
 
             <S.Card>
               <S.CardTitle>CREATE_FILE</S.CardTitle>
-              <S.CardDescription>Creates a new file with specified content</S.CardDescription>
+              <S.CardDescription>{t.actions.createFile.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/components/NewComponent.tsx",
@@ -77,31 +92,31 @@ const Docs = () => {
   "content": "import React from 'react';\\n\\nexport const NewComponent = () => {\\n  return <div>Hello</div>;\\n};"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - File path to create</S.ParamItem>
-                <S.ParamItem><S.ParamName>content</S.ParamName> - File content</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.createFile.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>content</S.ParamName> - {t.actions.createFile.params.content}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>DELETE_FILE</S.CardTitle>
-              <S.CardDescription>Deletes an existing file</S.CardDescription>
+              <S.CardDescription>{t.actions.deleteFile.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/old-component.tsx",
   "action": "DELETE_FILE"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - File path to delete</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.deleteFile.params.path}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>INSERT_IMPORT</S.CardTitle>
-              <S.CardDescription>Inserts an import statement at the top of the file</S.CardDescription>
+              <S.CardDescription>{t.actions.insertImport.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/App.tsx",
@@ -109,16 +124,16 @@ const Docs = () => {
   "content": "import { ThemeProvider } from './theme/ThemeProvider';"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - Target file path</S.ParamItem>
-                <S.ParamItem><S.ParamName>content</S.ParamName> - Import statement</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.insertImport.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>content</S.ParamName> - {t.actions.insertImport.params.content}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>INSERT_AFTER</S.CardTitle>
-              <S.CardDescription>Inserts content after a matching pattern</S.CardDescription>
+              <S.CardDescription>{t.actions.insertAfter.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/App.tsx",
@@ -127,17 +142,17 @@ const Docs = () => {
   "content": "  const [theme, setTheme] = useState('dark');"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - Target file path</S.ParamItem>
-                <S.ParamItem><S.ParamName>pattern</S.ParamName> - Text to find</S.ParamItem>
-                <S.ParamItem><S.ParamName>content</S.ParamName> - Content to insert</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.insertAfter.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>pattern</S.ParamName> - {t.actions.insertAfter.params.pattern}</S.ParamItem>
+                <S.ParamItem><S.ParamName>content</S.ParamName> - {t.actions.insertAfter.params.content}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>INSERT_BEFORE</S.CardTitle>
-              <S.CardDescription>Inserts content before a matching pattern</S.CardDescription>
+              <S.CardDescription>{t.actions.insertBefore.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/main.tsx",
@@ -146,17 +161,17 @@ const Docs = () => {
   "content": "initializeApp();"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - Target file path</S.ParamItem>
-                <S.ParamItem><S.ParamName>pattern</S.ParamName> - Text to find</S.ParamItem>
-                <S.ParamItem><S.ParamName>content</S.ParamName> - Content to insert</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.insertBefore.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>pattern</S.ParamName> - {t.actions.insertBefore.params.pattern}</S.ParamItem>
+                <S.ParamItem><S.ParamName>content</S.ParamName> - {t.actions.insertBefore.params.content}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>REPLACE_CONTENT</S.CardTitle>
-              <S.CardDescription>Replaces all occurrences of a pattern with new content</S.CardDescription>
+              <S.CardDescription>{t.actions.replaceContent.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/config.ts",
@@ -165,17 +180,17 @@ const Docs = () => {
   "replacement": "API_URL = 'production.com'"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - Target file path</S.ParamItem>
-                <S.ParamItem><S.ParamName>pattern</S.ParamName> - Text to find</S.ParamItem>
-                <S.ParamItem><S.ParamName>replacement</S.ParamName> - Replacement text</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.replaceContent.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>pattern</S.ParamName> - {t.actions.replaceContent.params.pattern}</S.ParamItem>
+                <S.ParamItem><S.ParamName>replacement</S.ParamName> - {t.actions.replaceContent.params.replacement}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>APPEND_TO_FILE</S.CardTitle>
-              <S.CardDescription>Appends content to the end of the file</S.CardDescription>
+              <S.CardDescription>{t.actions.appendToFile.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/routes.ts",
@@ -183,16 +198,16 @@ const Docs = () => {
   "content": "\\nexport { authRoutes } from './auth-routes';"
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - Target file path</S.ParamItem>
-                <S.ParamItem><S.ParamName>content</S.ParamName> - Content to append</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.appendToFile.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>content</S.ParamName> - {t.actions.appendToFile.params.content}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
 
             <S.Card>
               <S.CardTitle>INSERT_PROP</S.CardTitle>
-              <S.CardDescription>Inserts a prop into React component instances</S.CardDescription>
+              <S.CardDescription>{t.actions.insertProp.description}</S.CardDescription>
               <S.CodeBlock>
 {`{
   "path": "src/App.tsx",
@@ -202,12 +217,12 @@ const Docs = () => {
   "propValue": "\\"primary\\""
 }`}
               </S.CodeBlock>
-              <S.ParamsTitle>Required Parameters:</S.ParamsTitle>
+              <S.ParamsTitle>{t.requiredParameters}</S.ParamsTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>path</S.ParamName> - Target file path</S.ParamItem>
-                <S.ParamItem><S.ParamName>componentName</S.ParamName> - Component name</S.ParamItem>
-                <S.ParamItem><S.ParamName>propName</S.ParamName> - Prop name</S.ParamItem>
-                <S.ParamItem><S.ParamName>propValue</S.ParamName> - Prop value (optional)</S.ParamItem>
+                <S.ParamItem><S.ParamName>path</S.ParamName> - {t.actions.insertProp.params.path}</S.ParamItem>
+                <S.ParamItem><S.ParamName>componentName</S.ParamName> - {t.actions.insertProp.params.componentName}</S.ParamItem>
+                <S.ParamItem><S.ParamName>propName</S.ParamName> - {t.actions.insertProp.params.propName}</S.ParamItem>
+                <S.ParamItem><S.ParamName>propValue</S.ParamName> - {t.actions.insertProp.params.propValue}</S.ParamItem>
               </S.ParamsList>
             </S.Card>
           </S.Section>
@@ -217,14 +232,14 @@ const Docs = () => {
           <S.Section id="conditions">
             <S.SectionTitle>
               <S.Icon>{ICONS.RULE}</S.Icon>
-              Conditions
+              {t.conditions}
             </S.SectionTitle>
             <S.Description>
-              Conditions allow you to execute instructions only when specific criteria are met. You can combine multiple conditions using AND/OR logic operators.
+              {t.conditionsDescription}
             </S.Description>
 
             <S.SubSection>
-              <S.SubTitle>Condition Structure</S.SubTitle>
+              <S.SubTitle>{t.conditionStructure}</S.SubTitle>
               <S.CodeBlock>
 {`{
   "path": "src/App.tsx",
@@ -248,19 +263,19 @@ const Docs = () => {
             </S.SubSection>
 
             <S.SubSection>
-              <S.SubTitle>Logic Operators</S.SubTitle>
+              <S.SubTitle>{t.logicOperators}</S.SubTitle>
               <S.ParamsList>
-                <S.ParamItem><S.ParamName>AND</S.ParamName> - All conditions must be true</S.ParamItem>
-                <S.ParamItem><S.ParamName>OR</S.ParamName> - At least one condition must be true</S.ParamItem>
+                <S.ParamItem><S.ParamName>AND</S.ParamName> - {t.logicOperatorsDesc.and}</S.ParamItem>
+                <S.ParamItem><S.ParamName>OR</S.ParamName> - {t.logicOperatorsDesc.or}</S.ParamItem>
               </S.ParamsList>
             </S.SubSection>
 
             <S.SubSection>
-              <S.SubTitle>Condition Types</S.SubTitle>
+              <S.SubTitle>{t.conditionTypes}</S.SubTitle>
 
               <S.Card>
                 <S.CardTitle>MODULE_EXISTS</S.CardTitle>
-                <S.CardDescription>Checks if a module is selected in the installation</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.moduleExists}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "MODULE_EXISTS",
@@ -271,7 +286,7 @@ const Docs = () => {
 
               <S.Card>
                 <S.CardTitle>MODULE_NOT_EXISTS</S.CardTitle>
-                <S.CardDescription>Checks if a module is NOT selected</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.moduleNotExists}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "MODULE_NOT_EXISTS",
@@ -282,7 +297,7 @@ const Docs = () => {
 
               <S.Card>
                 <S.CardTitle>PATTERN_EXISTS</S.CardTitle>
-                <S.CardDescription>Checks if a pattern exists in the target file</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.patternExists}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "PATTERN_EXISTS",
@@ -290,12 +305,12 @@ const Docs = () => {
   "target": "src/App.tsx"
 }`}
                 </S.CodeBlock>
-                <S.Note>If target is not specified, uses the instruction's path</S.Note>
+                <S.Note>{t.targetNote}</S.Note>
               </S.Card>
 
               <S.Card>
                 <S.CardTitle>PATTERN_NOT_EXISTS</S.CardTitle>
-                <S.CardDescription>Checks if a pattern does NOT exist</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.patternNotExists}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "PATTERN_NOT_EXISTS",
@@ -306,7 +321,7 @@ const Docs = () => {
 
               <S.Card>
                 <S.CardTitle>PATTERN_COUNT</S.CardTitle>
-                <S.CardDescription>Checks the number of pattern occurrences</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.patternCount}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "PATTERN_COUNT",
@@ -315,20 +330,20 @@ const Docs = () => {
   "count": 2
 }`}
                 </S.CodeBlock>
-                <S.ParamsTitle>Operators:</S.ParamsTitle>
+                <S.ParamsTitle>{t.operators}:</S.ParamsTitle>
                 <S.ParamsList>
-                  <S.ParamItem><S.ParamName>EQUALS</S.ParamName> - Exactly equals count</S.ParamItem>
-                  <S.ParamItem><S.ParamName>NOT_EQUALS</S.ParamName> - Does not equal count</S.ParamItem>
-                  <S.ParamItem><S.ParamName>GREATER_THAN</S.ParamName> - Greater than count</S.ParamItem>
-                  <S.ParamItem><S.ParamName>LESS_THAN</S.ParamName> - Less than count</S.ParamItem>
-                  <S.ParamItem><S.ParamName>GREATER_OR_EQUAL</S.ParamName> - Greater than or equal</S.ParamItem>
-                  <S.ParamItem><S.ParamName>LESS_OR_EQUAL</S.ParamName> - Less than or equal</S.ParamItem>
+                  <S.ParamItem><S.ParamName>EQUALS</S.ParamName> - {t.operatorsDesc.equals}</S.ParamItem>
+                  <S.ParamItem><S.ParamName>NOT_EQUALS</S.ParamName> - {t.operatorsDesc.notEquals}</S.ParamItem>
+                  <S.ParamItem><S.ParamName>GREATER_THAN</S.ParamName> - {t.operatorsDesc.greaterThan}</S.ParamItem>
+                  <S.ParamItem><S.ParamName>LESS_THAN</S.ParamName> - {t.operatorsDesc.lessThan}</S.ParamItem>
+                  <S.ParamItem><S.ParamName>GREATER_OR_EQUAL</S.ParamName> - {t.operatorsDesc.greaterOrEqual}</S.ParamItem>
+                  <S.ParamItem><S.ParamName>LESS_OR_EQUAL</S.ParamName> - {t.operatorsDesc.lessOrEqual}</S.ParamItem>
                 </S.ParamsList>
               </S.Card>
 
               <S.Card>
                 <S.CardTitle>FILE_EXISTS</S.CardTitle>
-                <S.CardDescription>Checks if a file exists</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.fileExists}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "FILE_EXISTS",
@@ -339,7 +354,7 @@ const Docs = () => {
 
               <S.Card>
                 <S.CardTitle>FILE_NOT_EXISTS</S.CardTitle>
-                <S.CardDescription>Checks if a file does NOT exist</S.CardDescription>
+                <S.CardDescription>{t.conditionTypesDesc.fileNotExists}</S.CardDescription>
                 <S.CodeBlock>
 {`{
   "type": "FILE_NOT_EXISTS",
@@ -355,12 +370,12 @@ const Docs = () => {
           <S.Section id="examples">
             <S.SectionTitle>
               <S.Icon>{ICONS.LIGHTBULB}</S.Icon>
-              Practical Examples
+              {t.practicalExamples}
             </S.SectionTitle>
 
             <S.SubSection>
-              <S.SubTitle>Example 1: Conditional Import</S.SubTitle>
-              <S.Description>Only import ThemeProvider if theme module is installed and import doesn't exist yet</S.Description>
+              <S.SubTitle>{t.examplesContent.example1.title}</S.SubTitle>
+              <S.Description>{t.examplesContent.example1.description}</S.Description>
               <S.CodeBlock>
 {`{
   "path": "src/App.tsx",
@@ -384,8 +399,8 @@ const Docs = () => {
             </S.SubSection>
 
             <S.SubSection>
-              <S.SubTitle>Example 2: Wrap Component Based on Module</S.SubTitle>
-              <S.Description>Wrap app with ThemeProvider only if theme module exists</S.Description>
+              <S.SubTitle>{t.examplesContent.example2.title}</S.SubTitle>
+              <S.Description>{t.examplesContent.example2.description}</S.Description>
               <S.CodeBlock>
 {`{
   "path": "src/main.tsx",
@@ -405,8 +420,8 @@ const Docs = () => {
             </S.SubSection>
 
             <S.SubSection>
-              <S.SubTitle>Example 3: Complex Multi-Condition</S.SubTitle>
-              <S.Description>Add auth routes only if: auth module exists, routes file exists, and auth routes not already imported</S.Description>
+              <S.SubTitle>{t.examplesContent.example3.title}</S.SubTitle>
+              <S.Description>{t.examplesContent.example3.description}</S.Description>
               <S.CodeBlock>
 {`{
   "path": "src/config/routes.ts",
@@ -434,8 +449,8 @@ const Docs = () => {
             </S.SubSection>
 
             <S.SubSection>
-              <S.SubTitle>Example 4: OR Logic - Fallback Behavior</S.SubTitle>
-              <S.Description>Create global styles if neither styled-components nor tailwind is installed</S.Description>
+              <S.SubTitle>{t.examplesContent.example4.title}</S.SubTitle>
+              <S.Description>{t.examplesContent.example4.description}</S.Description>
               <S.CodeBlock>
 {`{
   "path": "src/styles/global.css",
@@ -459,8 +474,8 @@ const Docs = () => {
             </S.SubSection>
 
             <S.SubSection>
-              <S.SubTitle>Example 5: Pattern Count Validation</S.SubTitle>
-              <S.Description>Only add export if there are less than 2 default exports</S.Description>
+              <S.SubTitle>{t.examplesContent.example5.title}</S.SubTitle>
+              <S.Description>{t.examplesContent.example5.description}</S.Description>
               <S.CodeBlock>
 {`{
   "path": "src/utils/helpers.ts",
@@ -483,11 +498,11 @@ const Docs = () => {
 
           <S.Footer>
             <S.FooterText>
-              Need help? Check out the{' '}
+              {t.footerText}{' '}
               <S.FooterLink href="https://github.com/odutradev/zeck-templates" target="_blank" rel="noopener noreferrer">
-                GitHub repository
+                {t.githubRepo}
               </S.FooterLink>
-              {' '}for more examples and templates.
+              {' '}{t.footerText2}
             </S.FooterText>
           </S.Footer>
         </S.Main>
