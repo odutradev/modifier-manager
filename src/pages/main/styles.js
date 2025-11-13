@@ -286,6 +286,45 @@ export const CodeEditorWrapper = styled.div`
   }
 `;
 
+export const InlineEditorWrapper = styled.div`
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.2s;
+
+  &:focus-within {
+    border-color: #58a6ff;
+  }
+
+  .cm-editor {
+    font-size: 13px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    background-color: #0d1117;
+  }
+
+  .cm-gutters {
+    background-color: #0d1117;
+    border-right: 1px solid #30363d;
+    color: #484f58;
+  }
+
+  .cm-scroller {
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 4px;
+    }
+  }
+`;
+
 export const Panel = styled.aside`
   background: #0d1117;
   border-left: 1px solid #30363d;
