@@ -20,7 +20,12 @@ const ICONS = {
   IMPORT: 'file_upload',
   IMPORT_TEXT: 'post_add',
   MORE: 'more_vert',
-  CONDITION: 'rule'
+  CONDITION: 'rule',
+  CREATE_FOLDER: 'create_new_folder',
+  NOTE_ADD: 'note_add',
+  DRAG: 'drag_indicator',
+  ARROW_UP: 'arrow_upward',
+  ARROW_DOWN: 'arrow_downward'
 };
 
 const ModifierActions = {
@@ -78,19 +83,22 @@ const defaultInstructionState = {
   condition: null
 };
 
-const buildFileTree = (files) => {
+const buildFileTree = (files, virtualItems = {}) => {
   const root = [];
-  Object.keys(files).forEach(path => {
+  const allPaths = { ...files, ...virtualItems };
+  
+  Object.keys(allPaths).forEach(path => {
     const parts = path.split('/');
     let currentLevel = root;
     parts.forEach((part, index) => {
-      const isFile = index === parts.length - 1;
+      const isFile = index === parts.length - 1 && !virtualItems[path]?.isFolder;
       let existingPath = currentLevel.find(item => item.name === part && item.type === (isFile ? 'file' : 'folder'));
       if (!existingPath) {
         const newItem = {
           name: part,
           type: isFile ? 'file' : 'folder',
           path: isFile ? path : null,
+          isVirtual: !!virtualItems[path],
           children: isFile ? null : []
         };
         currentLevel.push(newItem);
@@ -117,28 +125,58 @@ const buildFileTree = (files) => {
   return root;
 };
 
-const FileTreeNode = ({ item, level, onSelect, currentFile }) => {
+const FileTreeNode = ({ item, level, onSelect, currentFile, onContextMenu, parentPath = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const isSelected = item.path === currentFile;
+  const fullPath = item.path || (parentPath ? `${parentPath}/${item.name}` : item.name);
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onContextMenu(e, item, fullPath);
+  };
 
   if (item.type === 'folder') {
     return (
       <>
-        <S.FolderItem level={level} onClick={() => setIsOpen(!isOpen)}>
+        <S.FolderItem 
+          level={level} 
+          onClick={() => setIsOpen(!isOpen)}
+          onContextMenu={handleContextMenu}
+          isVirtual={item.isVirtual}
+        >
           <S.ChevronIcon>{isOpen ? ICONS.CHEVRON_DOWN : ICONS.CHEVRON_RIGHT}</S.ChevronIcon>
-          <S.FileIcon style={{ color: '#dcb67a' }}>{isOpen ? ICONS.FOLDER_OPEN : ICONS.FOLDER}</S.FileIcon>
+          <S.FileIcon style={{ color: item.isVirtual ? '#7ee787' : '#dcb67a' }}>
+            {isOpen ? ICONS.FOLDER_OPEN : ICONS.FOLDER}
+          </S.FileIcon>
           {item.name}
         </S.FolderItem>
         {isOpen && item.children.map(child => (
-          <FileTreeNode key={child.path || child.name} item={child} level={level + 1} onSelect={onSelect} currentFile={currentFile} />
+          <FileTreeNode 
+            key={child.path || `${fullPath}/${child.name}`} 
+            item={child} 
+            level={level + 1} 
+            onSelect={onSelect} 
+            currentFile={currentFile}
+            onContextMenu={onContextMenu}
+            parentPath={fullPath}
+          />
         ))}
       </>
     );
   }
 
   return (
-    <S.FileItem level={level} active={isSelected} onClick={() => onSelect(item.path)}>
-      <S.FileIcon>{ICONS.FILE}</S.FileIcon>
+    <S.FileItem 
+      level={level} 
+      active={isSelected} 
+      onClick={() => onSelect(item.path)}
+      onContextMenu={handleContextMenu}
+      isVirtual={item.isVirtual}
+    >
+      <S.FileIcon style={{ color: item.isVirtual ? '#7ee787' : '#8b949e' }}>
+        {ICONS.FILE}
+      </S.FileIcon>
       {item.name}
     </S.FileItem>
   );
@@ -146,6 +184,7 @@ const FileTreeNode = ({ item, level, onSelect, currentFile }) => {
 
 const CodeEditor = () => {
   const [files, setFiles] = useState({});
+  const [virtualItems, setVirtualItems] = useState({});
   const [zipName, setZipName] = useState(null);
   const [currentFile, setCurrentFile] = useState(null);
   const [content, setContent] = useState('');
@@ -169,9 +208,16 @@ const CodeEditor = () => {
   const [logicOperator, setLogicOperator] = useState(LogicOperators.AND);
   const [editingConditionIndex, setEditingConditionIndex] = useState(null);
   const [newCondition, setNewCondition] = useState(defaultConditionState);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createType, setCreateType] = useState('file');
+  const [createName, setCreateName] = useState('');
+  const [createPath, setCreatePath] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
   const sidebarRef = useRef(null);
 
-  const fileTree = useMemo(() => buildFileTree(files), [files]);
+  const fileTree = useMemo(() => buildFileTree(files, virtualItems), [files, virtualItems]);
   const previewFileTree = useMemo(() => previewFiles ? buildFileTree(previewFiles) : [], [previewFiles]);
 
   const startResizing = useCallback((e) => {
@@ -204,10 +250,18 @@ const CodeEditor = () => {
   useEffect(() => {
     if (currentFile && files[currentFile]) {
       setContent(files[currentFile]);
+    } else if (currentFile && virtualItems[currentFile]) {
+      setContent(virtualItems[currentFile].content || '');
     } else if (!currentFile) {
       setContent('');
     }
-  }, [currentFile, files]);
+  }, [currentFile, files, virtualItems]);
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
 
   const handleZipUpload = async (e) => {
     const file = e.target.files[0];
@@ -245,6 +299,7 @@ const CodeEditor = () => {
     }
 
     setFiles(newFiles);
+    setVirtualItems({});
     setInstructions([]);
     const firstFile = Object.keys(newFiles)[0];
     if (firstFile) {
@@ -257,6 +312,7 @@ const CodeEditor = () => {
  
   const handleClear = () => {
     setFiles({});
+    setVirtualItems({});
     setCurrentFile(null);
     setZipName(null);
     setInstructions([]);
@@ -292,10 +348,20 @@ const CodeEditor = () => {
 
   const handleContentChange = (newContent) => {
     setContent(newContent);
-    setFiles(prev => ({
-      ...prev,
-      [currentFile]: newContent
-    }));
+    if (files[currentFile] !== undefined) {
+      setFiles(prev => ({
+        ...prev,
+        [currentFile]: newContent
+      }));
+    } else if (virtualItems[currentFile]) {
+      setVirtualItems(prev => ({
+        ...prev,
+        [currentFile]: {
+          ...prev[currentFile],
+          content: newContent
+        }
+      }));
+    }
   };
 
   const handleCloseModal = () => {
@@ -402,6 +468,36 @@ const CodeEditor = () => {
     setInstructions(prev => prev.filter((_, i) => i !== index));
   };
 
+  const moveInstruction = (fromIndex, toIndex) => {
+    if (toIndex < 0 || toIndex >= instructions.length) return;
+    
+    setInstructions(prev => {
+      const newInstructions = [...prev];
+      const [movedItem] = newInstructions.splice(fromIndex, 1);
+      newInstructions.splice(toIndex, 0, movedItem);
+      return newInstructions;
+    });
+  };
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+      moveInstruction(draggedIndex, dragOverIndex);
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   const handleExportClick = () => {
     const json = JSON.stringify({ instructions }, null, 2);
     setJsonContent(json);
@@ -466,6 +562,67 @@ const CodeEditor = () => {
     } catch (error) {
       alert('Invalid JSON. Please check your text.');
     }
+  };
+
+  const handleContextMenu = (e, item, fullPath) => {
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      item,
+      fullPath
+    });
+  };
+
+  const handleCreateItem = (type, basePath = '') => {
+    setCreateType(type);
+    setCreatePath(basePath);
+    setCreateName('');
+    setShowCreateModal(true);
+    setContextMenu(null);
+  };
+
+  const handleConfirmCreate = () => {
+    if (!createName.trim()) return;
+
+    const fullPath = createPath ? `${createPath}/${createName}` : createName;
+    
+    if (createType === 'folder') {
+      setVirtualItems(prev => ({
+        ...prev,
+        [fullPath]: { isFolder: true }
+      }));
+    } else {
+      setVirtualItems(prev => ({
+        ...prev,
+        [fullPath]: { content: '' }
+      }));
+      setCurrentFile(fullPath);
+    }
+
+    setShowCreateModal(false);
+    setCreateName('');
+    setCreatePath('');
+  };
+
+  const handleDeleteVirtualItem = (path) => {
+    setVirtualItems(prev => {
+      const newItems = { ...prev };
+      delete newItems[path];
+      
+      Object.keys(newItems).forEach(key => {
+        if (key.startsWith(path + '/')) {
+          delete newItems[key];
+        }
+      });
+      
+      return newItems;
+    });
+    
+    if (currentFile === path || currentFile?.startsWith(path + '/')) {
+      setCurrentFile(null);
+    }
+    
+    setContextMenu(null);
   };
 
   const handlePreview = () => {
@@ -848,7 +1005,23 @@ const CodeEditor = () => {
       <S.Content style={{ gridTemplateColumns: `${sidebarWidth}px 1fr 350px` }}>
         <S.SidebarContainer>
           <S.Sidebar>
-            <S.SidebarTitle>Explorer</S.SidebarTitle>
+            <S.SidebarHeader>
+              <S.SidebarTitle>Explorer</S.SidebarTitle>
+              <S.SidebarActions>
+                <S.SidebarActionButton 
+                  onClick={() => handleCreateItem('file')}
+                  title="New File"
+                >
+                  <S.Icon>{ICONS.NOTE_ADD}</S.Icon>
+                </S.SidebarActionButton>
+                <S.SidebarActionButton 
+                  onClick={() => handleCreateItem('folder')}
+                  title="New Folder"
+                >
+                  <S.Icon>{ICONS.CREATE_FOLDER}</S.Icon>
+                </S.SidebarActionButton>
+              </S.SidebarActions>
+            </S.SidebarHeader>
             <S.FileList>
               {fileTree.map(item => (
                 <FileTreeNode 
@@ -856,7 +1029,8 @@ const CodeEditor = () => {
                   item={item} 
                   level={0} 
                   onSelect={setCurrentFile} 
-                  currentFile={currentFile} 
+                  currentFile={currentFile}
+                  onContextMenu={handleContextMenu}
                 />
               ))}
             </S.FileList>
@@ -869,7 +1043,7 @@ const CodeEditor = () => {
             <S.FilePath>{currentFile || 'No file selected'}</S.FilePath>
             <S.ActionButton 
               onClick={handleOpenInstructionBuilder}
-              disabled={!currentFile && !Object.keys(files).length}
+              disabled={!currentFile && !Object.keys(files).length && !Object.keys(virtualItems).length}
             >
               <S.Icon>{ICONS.PLUS}</S.Icon>
               New Instruction
@@ -892,7 +1066,6 @@ const CodeEditor = () => {
               }}
             />
           </S.CodeEditorWrapper>
-
         </S.Editor>
 
         <S.Panel>
@@ -905,7 +1078,7 @@ const CodeEditor = () => {
                 </S.MenuButton>
                 {showMenu && (
                   <>
-                <S.MenuBackdrop onClick={() => setShowMenu(false)} />
+                    <S.MenuBackdrop onClick={() => setShowMenu(false)} />
                     <S.MenuDropdown>
                       <S.MenuItem onClick={handlePreview} disabled={instructions.length === 0}>
                         <S.Icon>{ICONS.PREVIEW}</S.Icon>
@@ -934,12 +1107,40 @@ const CodeEditor = () => {
 
           <S.InstructionList>
             {instructions.map((inst, index) => (
-              <S.InstructionCard key={index} onClick={() => handleEditInstruction(index)}>
+              <S.InstructionCard 
+                key={index} 
+                onClick={() => handleEditInstruction(index)}
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                isDragging={draggedIndex === index}
+                isDragOver={dragOverIndex === index}
+              >
                 <S.InstructionHeader>
+                  <S.DragHandle>
+                    <S.Icon>{ICONS.DRAG}</S.Icon>
+                  </S.DragHandle>
                   <S.ActionBadge>{inst.action}</S.ActionBadge>
-                  <S.RemoveButton onClick={(e) => removeInstruction(e, index)}>
-                    <S.Icon>{ICONS.TRASH}</S.Icon>
-                  </S.RemoveButton>
+                  <S.InstructionControls>
+                    <S.MoveButton 
+                      onClick={(e) => { e.stopPropagation(); moveInstruction(index, index - 1); }}
+                      disabled={index === 0}
+                      title="Move Up"
+                    >
+                      <S.Icon>{ICONS.ARROW_UP}</S.Icon>
+                    </S.MoveButton>
+                    <S.MoveButton 
+                      onClick={(e) => { e.stopPropagation(); moveInstruction(index, index + 1); }}
+                      disabled={index === instructions.length - 1}
+                      title="Move Down"
+                    >
+                      <S.Icon>{ICONS.ARROW_DOWN}</S.Icon>
+                    </S.MoveButton>
+                    <S.RemoveButton onClick={(e) => removeInstruction(e, index)}>
+                      <S.Icon>{ICONS.TRASH}</S.Icon>
+                    </S.RemoveButton>
+                  </S.InstructionControls>
                 </S.InstructionHeader>
                 <S.InstructionPath>{inst.path}</S.InstructionPath>
                 {inst.pattern && <S.InstructionDetail>Pattern: {inst.pattern}</S.InstructionDetail>}
@@ -955,6 +1156,84 @@ const CodeEditor = () => {
           </S.InstructionList>
         </S.Panel>
       </S.Content>
+
+      {contextMenu && (
+        <S.ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }}>
+          {contextMenu.item.type === 'folder' && (
+            <>
+              <S.ContextMenuItem onClick={() => handleCreateItem('file', contextMenu.fullPath)}>
+                <S.Icon>{ICONS.NOTE_ADD}</S.Icon>
+                New File
+              </S.ContextMenuItem>
+              <S.ContextMenuItem onClick={() => handleCreateItem('folder', contextMenu.fullPath)}>
+                <S.Icon>{ICONS.CREATE_FOLDER}</S.Icon>
+                New Folder
+              </S.ContextMenuItem>
+              {contextMenu.item.isVirtual && (
+                <>
+                  <S.ContextMenuSeparator />
+                  <S.ContextMenuItem 
+                    onClick={() => handleDeleteVirtualItem(contextMenu.fullPath)}
+                    danger
+                  >
+                    <S.Icon>{ICONS.TRASH}</S.Icon>
+                    Delete
+                  </S.ContextMenuItem>
+                </>
+              )}
+            </>
+          )}
+          {contextMenu.item.type === 'file' && contextMenu.item.isVirtual && (
+            <S.ContextMenuItem 
+              onClick={() => handleDeleteVirtualItem(contextMenu.fullPath)}
+              danger
+            >
+              <S.Icon>{ICONS.TRASH}</S.Icon>
+              Delete
+            </S.ContextMenuItem>
+          )}
+        </S.ContextMenu>
+      )}
+
+      {showCreateModal && (
+        <S.Modal onClick={() => setShowCreateModal(false)}>
+          <S.ModalContent onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>New {createType === 'folder' ? 'Folder' : 'File'}</S.ModalTitle>
+              <S.CloseButton onClick={() => setShowCreateModal(false)}>
+                <S.Icon style={{ fontSize: 20 }}>{ICONS.CLOSE}</S.Icon>
+              </S.CloseButton>
+            </S.ModalHeader>
+            <S.Form>
+              <S.Field>
+                <S.Label>Name</S.Label>
+                <S.Input
+                  value={createName}
+                  onChange={(e) => setCreateName(e.target.value)}
+                  placeholder={createType === 'folder' ? 'components' : 'component.jsx'}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleConfirmCreate();
+                  }}
+                />
+              </S.Field>
+              {createPath && (
+                <S.Note>
+                  Will be created in: {createPath}/
+                </S.Note>
+              )}
+            </S.Form>
+            <S.ButtonGroup>
+              <S.CancelButton onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </S.CancelButton>
+              <S.AddButton onClick={handleConfirmCreate} disabled={!createName.trim()}>
+                Create
+              </S.AddButton>
+            </S.ButtonGroup>
+          </S.ModalContent>
+        </S.Modal>
+      )}
 
       {showBuilder && (
         <S.Modal onClick={handleCloseModal}>
@@ -1027,7 +1306,6 @@ const CodeEditor = () => {
                   </>
                 )}
               </S.ConditionsSection>
-
             </S.Form>
            
             <S.ButtonGroup>
@@ -1154,7 +1432,8 @@ const CodeEditor = () => {
                         item={item} 
                         level={0} 
                         onSelect={setPreviewFile} 
-                        currentFile={previewFile} 
+                        currentFile={previewFile}
+                        onContextMenu={() => {}}
                       />
                     ))}
                   </S.FileList>
@@ -1176,7 +1455,6 @@ const CodeEditor = () => {
           </S.PreviewModalContent>
         </S.Modal>
       )}
-
     </S.Container>
   );
 };

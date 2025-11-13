@@ -124,6 +124,41 @@ export const Sidebar = styled.aside`
   }
 `;
 
+export const SidebarHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+`;
+
+export const SidebarActions = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+export const SidebarActionButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #30363d;
+    color: #c9d1d9;
+  }
+
+  ${Icon} {
+    font-size: 18px;
+  }
+`;
+
 export const Resizer = styled.div`
   width: 5px;
   background: transparent;
@@ -142,7 +177,6 @@ export const SidebarTitle = styled.h2`
   text-transform: uppercase;
   color: #8b949e;
   margin: 0;
-  padding: 10px 16px;
 `;
 
 export const FileList = styled.div`
@@ -163,6 +197,10 @@ export const FileItem = styled.div`
   transition: all 0.1s;
   white-space: nowrap;
   user-select: none;
+  ${props => props.isVirtual && `
+    font-style: italic;
+    border-left: 2px solid #7ee787;
+  `}
 
   &:hover {
     color: #c9d1d9;
@@ -173,6 +211,9 @@ export const FileItem = styled.div`
 export const FolderItem = styled(FileItem)`
   color: #c9d1d9;
   font-weight: 600;
+  ${props => props.isVirtual && `
+    border-left: 2px solid #7ee787;
+  `}
 `;
 
 export const FileIcon = styled(Icon)`
@@ -184,6 +225,59 @@ export const ChevronIcon = styled(Icon)`
   font-size: 16px;
   color: #8b949e;
   margin-right: 2px;
+`;
+
+export const ContextMenu = styled.div`
+  position: fixed;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px #010409;
+  z-index: 1001;
+  min-width: 180px;
+  padding: 8px 0;
+`;
+
+export const ContextMenuItem = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  background: transparent;
+  border: 0;
+  color: ${props => props.danger ? '#f85149' : '#c9d1d9'};
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${props => props.danger ? '#da3633' : '#1f6feb'};
+    color: white;
+  }
+
+  ${Icon} {
+    font-size: 18px;
+    opacity: 0.7;
+  }
+`;
+
+export const ContextMenuSeparator = styled.div`
+  height: 1px;
+  background: #30363d;
+  margin: 8px 0;
+`;
+
+export const Note = styled.div`
+  background: #1c2128;
+  border-left: 3px solid #58a6ff;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #8b949e;
+  border-radius: 4px;
 `;
 
 export const Editor = styled.div`
@@ -474,7 +568,10 @@ export const InstructionCard = styled.div`
   padding: 12px;
   margin-bottom: 8px;
   transition: all 0.2s;
-  cursor: pointer;
+  cursor: ${props => props.isDragging ? 'grabbing' : 'pointer'};
+  opacity: ${props => props.isDragging ? 0.5 : 1};
+  transform: ${props => props.isDragOver ? 'translateY(-2px)' : 'none'};
+  box-shadow: ${props => props.isDragOver ? '0 -2px 0 #58a6ff' : 'none'};
 
   &:hover {
     border-color: #8b949e;
@@ -484,11 +581,29 @@ export const InstructionCard = styled.div`
 export const InstructionHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
 `;
 
+export const DragHandle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #484f58;
+  cursor: grab;
+  flex-shrink: 0;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  ${Icon} {
+    font-size: 18px;
+  }
+`;
+
 export const ActionBadge = styled.span`
+  flex: 1;
   padding: 4px 8px;
   background: #388bfd26;
   border: 1px solid #388bfd;
@@ -498,6 +613,40 @@ export const ActionBadge = styled.span`
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+`;
+
+export const InstructionControls = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+export const MoveButton = styled.button`
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: #30363d;
+    color: #58a6ff;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  ${Icon} {
+    font-size: 16px;
+  }
 `;
 
 export const ConditionBadge = styled.div`
@@ -515,12 +664,11 @@ export const ConditionBadge = styled.div`
 `;
 
 export const RemoveButton = styled.button`
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   background: transparent;
   border: none;
   color: #8b949e;
-  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -532,6 +680,10 @@ export const RemoveButton = styled.button`
   &:hover {
     background: #da3633;
     color: white;
+  }
+
+  ${Icon} {
+    font-size: 16px;
   }
 `;
 
