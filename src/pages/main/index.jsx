@@ -127,6 +127,148 @@ const buildFileTree = (files, virtualItems = {}) => {
   return root;
 };
 
+const evaluateCondition = (condition, files, loadedModules = []) => {
+  try {
+    switch (condition.type) {
+      case ConditionTypes.MODULE_EXISTS:
+        return loadedModules.includes(condition.value);
+
+      case ConditionTypes.MODULE_NOT_EXISTS:
+        return !loadedModules.includes(condition.value);
+
+      case ConditionTypes.FILE_EXISTS:
+        return files[condition.target || condition.value] !== undefined;
+
+      case ConditionTypes.FILE_NOT_EXISTS:
+        return files[condition.target || condition.value] === undefined;
+
+      case ConditionTypes.PATTERN_EXISTS: {
+        const targetFile = condition.target || condition.value;
+        const fileContent = files[targetFile];
+        if (!fileContent) return false;
+        return fileContent.includes(condition.value);
+      }
+
+      case ConditionTypes.PATTERN_NOT_EXISTS: {
+        const targetFile = condition.target || condition.value;
+        const fileContent = files[targetFile];
+        if (!fileContent) return true;
+        return !fileContent.includes(condition.value);
+      }
+
+      case ConditionTypes.PATTERN_COUNT: {
+        const targetFile = condition.target || condition.value;
+        const fileContent = files[targetFile];
+        if (!fileContent) return false;
+        
+        const count = (fileContent.match(new RegExp(condition.value, 'g')) || []).length;
+        
+        switch (condition.operator) {
+          case ConditionOperators.EQUALS:
+            return count === condition.count;
+          case ConditionOperators.NOT_EQUALS:
+            return count !== condition.count;
+          case ConditionOperators.GREATER_THAN:
+            return count > condition.count;
+          case ConditionOperators.LESS_THAN:
+            return count < condition.count;
+          case ConditionOperators.GREATER_OR_EQUAL:
+            return count >= condition.count;
+          case ConditionOperators.LESS_OR_EQUAL:
+            return count <= condition.count;
+          default:
+            return false;
+        }
+      }
+
+      default:
+        return true;
+    }
+  } catch (error) {
+    console.error('Error evaluating condition:', condition, error);
+    return false;
+  }
+};
+
+const evaluateConditions = (conditionsObj, files, loadedModules = []) => {
+  if (!conditionsObj || !conditionsObj.conditions || conditionsObj.conditions.length === 0) {
+    return true;
+  }
+
+  const results = conditionsObj.conditions.map(cond => 
+    evaluateCondition(cond, files, loadedModules)
+  );
+
+  if (conditionsObj.logic === LogicOperators.OR) {
+    return results.some(r => r);
+  }
+
+  return results.every(r => r);
+};
+
+const applyInstructions = (files, instructions, loadedModules = []) => {
+  let modifiedFiles = { ...files };
+
+  for (const inst of instructions) {
+    const path = inst.path;
+    if (!path) continue;
+
+    if (inst.condition && !evaluateConditions(inst.condition, modifiedFiles, loadedModules)) {
+      console.log('Skipping instruction due to condition:', inst);
+      continue;
+    }
+
+    try {
+      switch (inst.action) {
+        case ModifierActions.CREATE_FILE:
+          modifiedFiles[path] = inst.content || '';
+          break;
+         
+        case ModifierActions.DELETE_FILE:
+          delete modifiedFiles[path];
+          break;
+         
+        case ModifierActions.INSERT_IMPORT:
+          if (modifiedFiles[path] !== undefined) {
+            modifiedFiles[path] = `${inst.content}\n${modifiedFiles[path]}`;
+          }
+          break;
+         
+        case ModifierActions.APPEND_TO_FILE:
+          if (modifiedFiles[path] !== undefined) {
+            modifiedFiles[path] += `\n${inst.content}`;
+          }
+          break;
+         
+        case ModifierActions.INSERT_AFTER:
+          if (modifiedFiles[path] !== undefined && inst.pattern) {
+            modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(`${inst.pattern}\n${inst.content}`);
+          }
+          break;
+         
+        case ModifierActions.INSERT_BEFORE:
+          if (modifiedFiles[path] !== undefined && inst.pattern) {
+            modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(`${inst.content}\n${inst.pattern}`);
+          }
+          break;
+         
+        case ModifierActions.REPLACE_CONTENT:
+          if (modifiedFiles[path] !== undefined && inst.pattern) {
+            modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(inst.replacement || '');
+          }
+          break;
+       
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error("Error applying instruction:", inst, error);
+    }
+  }
+
+  return modifiedFiles;
+};
+
 const FileTreeNode = ({ item, level, onSelect, currentFile, onContextMenu, parentPath = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const isSelected = item.path === currentFile;
@@ -459,15 +601,6 @@ const CodeEditor = () => {
         return;
       }
 
-      setFiles(newFiles);
-      setVirtualItems({});
-      setZipName(selectedTemplate.name);
-      
-      const firstFile = Object.keys(newFiles)[0];
-      if (firstFile) {
-        setCurrentFile(firstFile);
-      }
-
       const moduleInstructions = [];
       for (const moduleName of selectedModules) {
         const module = selectedTemplate.modules.find(m => m.name === moduleName);
@@ -509,11 +642,24 @@ const CodeEditor = () => {
 
       console.log('✓ Total instructions loaded:', moduleInstructions.length);
 
-      setInstructions(moduleInstructions);
+      const modifiedFiles = applyInstructions(newFiles, moduleInstructions, selectedModules);
+
+      setFiles(modifiedFiles);
+      setVirtualItems({});
+      setZipName(selectedTemplate.name);
+      setInstructions([]);
+      
+      const firstFile = Object.keys(modifiedFiles)[0];
+      if (firstFile) {
+        setCurrentFile(firstFile);
+      }
+
       setShowTemplateModal(false);
       setSelectedEnvironment(null);
       setSelectedTemplate(null);
       setSelectedModules([]);
+
+      console.log('✓ Template loaded with modules applied successfully');
     } catch (error) {
       console.error('Error details:', error);
       alert('Error loading template: ' + error.message);
@@ -836,60 +982,7 @@ const CodeEditor = () => {
   };
 
   const handlePreview = () => {
-    let modifiedFiles = { ...files };
-
-    for (const inst of instructions) {
-      const path = inst.path;
-      if (!path) continue;
-
-      try {
-        switch (inst.action) {
-          case ModifierActions.CREATE_FILE:
-            modifiedFiles[path] = inst.content || '';
-            break;
-           
-          case ModifierActions.DELETE_FILE:
-            delete modifiedFiles[path];
-            break;
-           
-          case ModifierActions.INSERT_IMPORT:
-            if (modifiedFiles[path] !== undefined) {
-              modifiedFiles[path] = `${inst.content}\n${modifiedFiles[path]}`;
-            }
-            break;
-           
-          case ModifierActions.APPEND_TO_FILE:
-            if (modifiedFiles[path] !== undefined) {
-              modifiedFiles[path] += `\n${inst.content}`;
-            }
-            break;
-           
-          case ModifierActions.INSERT_AFTER:
-            if (modifiedFiles[path] !== undefined && inst.pattern) {
-              modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(`${inst.pattern}\n${inst.content}`);
-            }
-            break;
-           
-          case ModifierActions.INSERT_BEFORE:
-            if (modifiedFiles[path] !== undefined && inst.pattern) {
-              modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(`${inst.content}\n${inst.pattern}`);
-            }
-            break;
-           
-          case ModifierActions.REPLACE_CONTENT:
-            if (modifiedFiles[path] !== undefined && inst.pattern) {
-              modifiedFiles[path] = modifiedFiles[path].split(inst.pattern).join(inst.replacement || '');
-            }
-            break;
-         
-          default:
-            break;
-        }
-      } catch (error) {
-        console.error("Error applying instruction:", inst, error);
-      }
-    }
-   
+    const modifiedFiles = applyInstructions(files, instructions);
     setPreviewFiles(modifiedFiles);
     const firstFile = Object.keys(modifiedFiles).length > 0 ? Object.keys(modifiedFiles)[0] : null;
     setPreviewFile(firstFile);
