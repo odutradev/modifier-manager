@@ -27,7 +27,9 @@ const ICONS = {
   ARROW_UP: 'arrow_upward',
   ARROW_DOWN: 'arrow_downward',
   TEMPLATE: 'dashboard_customize',
-  CHECK: 'check_circle'
+  CHECK: 'check_circle',
+  CLEAR: 'clear_all',
+  MODULE: 'extension'
 };
 
 const ModifierActions = {
@@ -365,6 +367,9 @@ const CodeEditor = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedModules, setSelectedModules] = useState([]);
   const [templateZipFile, setTemplateZipFile] = useState(null);
+  const [showModuleModal, setShowModuleModal] = useState(false);
+  const [availableModules, setAvailableModules] = useState([]);
+  const [selectedModuleToLoad, setSelectedModuleToLoad] = useState(null);
   const sidebarRef = useRef(null);
 
   const fileTree = useMemo(() => buildFileTree(files, virtualItems), [files, virtualItems]);
@@ -663,6 +668,92 @@ const CodeEditor = () => {
     } catch (error) {
       console.error('Error details:', error);
       alert('Error loading template: ' + error.message);
+    }
+  };
+
+  const handleLoadModuleClick = async () => {
+    if (!templateZipFile) {
+      alert('Please load a templates ZIP file first');
+      return;
+    }
+
+    try {
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(templateZipFile);
+      
+      const modules = [];
+      
+      for (const [path, file] of Object.entries(contents.files)) {
+        if (path.includes('.modules/') && path.endsWith('.json') && !file.dir) {
+          try {
+            const moduleContent = await file.async('text');
+            const moduleData = JSON.parse(moduleContent);
+            
+            if (moduleData.instructions && Array.isArray(moduleData.instructions)) {
+              const moduleName = path.split('/').pop().replace('.json', '');
+              modules.push({
+                name: moduleData.name || moduleName,
+                description: moduleData.description || 'No description',
+                path: path,
+                instructionsCount: moduleData.instructions.length
+              });
+            }
+          } catch (e) {
+            console.warn('Failed to parse module:', path, e);
+          }
+        }
+      }
+
+      if (modules.length === 0) {
+        alert('No modules found in templates ZIP');
+        return;
+      }
+
+      setAvailableModules(modules);
+      setShowModuleModal(true);
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Error loading modules:', error);
+      alert('Error loading modules: ' + error.message);
+    }
+  };
+
+  const loadModuleInstructions = async () => {
+    if (!selectedModuleToLoad || !templateZipFile) return;
+
+    try {
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(templateZipFile);
+      
+      const moduleFile = contents.files[selectedModuleToLoad.path];
+      if (!moduleFile) {
+        alert('Module file not found');
+        return;
+      }
+
+      const moduleContent = await moduleFile.async('text');
+      const moduleData = JSON.parse(moduleContent);
+
+      if (moduleData.instructions && Array.isArray(moduleData.instructions)) {
+        setInstructions(prev => [...prev, ...moduleData.instructions]);
+        console.log(`✓ Loaded ${moduleData.instructions.length} instructions from ${selectedModuleToLoad.name}`);
+      }
+
+      setShowModuleModal(false);
+      setSelectedModuleToLoad(null);
+    } catch (error) {
+      console.error('Error loading module instructions:', error);
+      alert('Error loading module instructions: ' + error.message);
+    }
+  };
+
+  const handleClearInstructions = () => {
+    if (instructions.length === 0) return;
+    
+    const confirmed = window.confirm(`Clear all ${instructions.length} instruction(s)?`);
+    if (confirmed) {
+      setInstructions([]);
+      setShowMenu(false);
     }
   };
  
@@ -1412,6 +1503,15 @@ const CodeEditor = () => {
                         <S.Icon>{ICONS.IMPORT_TEXT}</S.Icon>
                         Import Text
                       </S.MenuItem>
+                      <S.MenuItem onClick={handleLoadModuleClick} disabled={!templateZipFile}>
+                        <S.Icon>{ICONS.MODULE}</S.Icon>
+                        Load Module
+                      </S.MenuItem>
+                      <S.MenuSeparator />
+                      <S.MenuItem onClick={handleClearInstructions} disabled={instructions.length === 0}>
+                        <S.Icon>{ICONS.CLEAR}</S.Icon>
+                        Clear Instructions
+                      </S.MenuItem>
                     </S.MenuDropdown>
                   </>
                 )}
@@ -1582,6 +1682,51 @@ const CodeEditor = () => {
               </S.CancelButton>
               <S.AddButton onClick={loadTemplateFiles} disabled={!selectedTemplate}>
                 Load Template
+              </S.AddButton>
+            </S.ButtonGroup>
+          </S.ModalContent>
+        </S.Modal>
+      )}
+
+      {showModuleModal && (
+        <S.Modal onClick={() => setShowModuleModal(false)}>
+          <S.ModalContent onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>Load Module Instructions</S.ModalTitle>
+              <S.CloseButton onClick={() => setShowModuleModal(false)}>
+                <S.Icon style={{ fontSize: 20 }}>{ICONS.CLOSE}</S.Icon>
+              </S.CloseButton>
+            </S.ModalHeader>
+            <S.Form>
+              <S.Field>
+                <S.Label>Select Module</S.Label>
+                <S.ModulesList>
+                  {availableModules.map(module => (
+                    <S.ModuleItem 
+                      key={module.path}
+                      selected={selectedModuleToLoad?.path === module.path}
+                      onClick={() => setSelectedModuleToLoad(module)}
+                    >
+                      <S.ModuleCheckbox selected={selectedModuleToLoad?.path === module.path}>
+                        {selectedModuleToLoad?.path === module.path && <S.Icon>{ICONS.CHECK}</S.Icon>}
+                      </S.ModuleCheckbox>
+                      <S.ModuleContent>
+                        <S.ModuleName>{module.name}</S.ModuleName>
+                        <S.ModuleDescription>
+                          {module.description} • {module.instructionsCount} instruction{module.instructionsCount !== 1 ? 's' : ''}
+                        </S.ModuleDescription>
+                      </S.ModuleContent>
+                    </S.ModuleItem>
+                  ))}
+                </S.ModulesList>
+              </S.Field>
+            </S.Form>
+            <S.ButtonGroup>
+              <S.CancelButton onClick={() => setShowModuleModal(false)}>
+                Cancel
+              </S.CancelButton>
+              <S.AddButton onClick={loadModuleInstructions} disabled={!selectedModuleToLoad}>
+                Load Instructions
               </S.AddButton>
             </S.ButtonGroup>
           </S.ModalContent>
