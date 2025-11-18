@@ -1044,3 +1044,134 @@ export const ConditionContent = styled.div`
   color: #c9d1d9;
   font-family: 'Courier New', monospace;
 `;
+
+export const TemplateButton = styled.button`
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #238636;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2ea043;
+  }
+`;
+
+export const TemplateGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+`;
+
+export const TemplateCard = styled.div`
+  padding: 16px;
+  background: ${props => props.selected ? '#1f6feb20' : '#0d1117'};
+  border: 2px solid ${props => props.selected ? '#1f6feb' : '#30363d'};
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: ${props => props.selected ? '#1f6feb' : '#8b949e'};
+    background: ${props => props.selected ? '#1f6feb30' : '#161b22'};
+  }
+`;
+
+export const TemplateCardTitle = styled.h3`
+  font-size: 14px;
+  font-weight: 600;
+  color: #c9d1d9;
+  margin: 0 0 4px 0;
+`;
+
+export const TemplateCardSubtitle = styled.p`
+  font-size: 12px;
+  color: #8b949e;
+  margin: 0;
+`;
+
+export const TemplateCardDescription = styled.p`
+  font-size: 12px;
+  color: #8b949e;
+  margin: 0;
+  line-height: 1.4;
+`;
+
+export const ModulesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+  }
+`;
+
+export const ModuleItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: ${props => props.selected ? '#388bfd26' : '#0d1117'};
+  border: 1px solid ${props => props.selected ? '#388bfd' : '#30363d'};
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: ${props => props.selected ? '#388bfd' : '#8b949e'};
+    background: ${props => props.selected ? '#388bfd26' : '#161b22'};
+  }
+`;
+
+export const ModuleCheckbox = styled.div`
+  width: 20px;
+  height: 20px;
+  border: 2px solid ${props => props.selected ? '#58a6ff' : '#30363d'};
+  border-radius: 4px;
+  background: ${props => props.selected ? '#58a6ff' : 'transparent'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  ${Icon} {
+    font-size: 14px;
+    color: white;
+  }
+`;
+
+export const ModuleContent = styled.div`
+  flex: 1;
+`;
+
+export const ModuleName = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: #c9d1d9;
+  margin-bottom: 4px;
+`;
+
+export const ModuleDescription = styled.div`
+  font-size: 12px;
+  color: #8b949e;
+  line-height: 1.4;
+`;

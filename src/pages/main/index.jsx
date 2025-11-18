@@ -25,7 +25,9 @@ const ICONS = {
   NOTE_ADD: 'note_add',
   DRAG: 'drag_indicator',
   ARROW_UP: 'arrow_upward',
-  ARROW_DOWN: 'arrow_downward'
+  ARROW_DOWN: 'arrow_downward',
+  TEMPLATE: 'dashboard_customize',
+  CHECK: 'check_circle'
 };
 
 const ModifierActions = {
@@ -215,6 +217,12 @@ const CodeEditor = () => {
   const [createPath, setCreatePath] = useState('');
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templatesData, setTemplatesData] = useState(null);
+  const [selectedEnvironment, setSelectedEnvironment] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedModules, setSelectedModules] = useState([]);
+  const [templateZipFile, setTemplateZipFile] = useState(null);
   const sidebarRef = useRef(null);
 
   const fileTree = useMemo(() => buildFileTree(files, virtualItems), [files, virtualItems]);
@@ -308,6 +316,208 @@ const CodeEditor = () => {
       setCurrentFile(null);
     }
     e.target.value = null; 
+  };
+
+  const handleTemplateZipUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setTemplateZipFile(file);
+    e.target.value = null;
+  };
+
+  const loadTemplatesJson = async () => {
+    if (!templateZipFile) return;
+
+    try {
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(templateZipFile);
+      
+      console.log('ZIP structure:', Object.keys(contents.files));
+
+      let templatesJsonFile = null;
+      for (const [path, file] of Object.entries(contents.files)) {
+        if (path.endsWith('templates.json') && !file.dir) {
+          templatesJsonFile = file;
+          console.log('Found templates.json at:', path);
+          break;
+        }
+      }
+
+      if (!templatesJsonFile) {
+        console.error('Available files:', Object.keys(contents.files));
+        alert('templates.json not found in ZIP. Check console for available files.');
+        return;
+      }
+
+      const templatesContent = await templatesJsonFile.async('text');
+      const templates = JSON.parse(templatesContent);
+      setTemplatesData(templates);
+      setShowTemplateModal(true);
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Error details:', error);
+      alert('Error loading templates.json: ' + error.message);
+    }
+  };
+
+  const handleEnvironmentSelect = (env) => {
+    setSelectedEnvironment(env);
+    setSelectedTemplate(null);
+    setSelectedModules([]);
+  };
+
+  const handleTemplateSelect = (template) => {
+    setSelectedTemplate(template);
+    setSelectedModules([]);
+  };
+
+  const toggleModule = (moduleName) => {
+    setSelectedModules(prev => {
+      if (prev.includes(moduleName)) {
+        return prev.filter(m => m !== moduleName);
+      } else {
+        return [...prev, moduleName];
+      }
+    });
+  };
+
+  const loadTemplateFiles = async () => {
+    if (!templateZipFile || !selectedTemplate) return;
+
+    try {
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(templateZipFile);
+      
+      const allPaths = Object.keys(contents.files).filter(p => !p.startsWith('__MACOSX'));
+      console.log('All paths in ZIP:', allPaths.slice(0, 30));
+      console.log('Looking for template:', selectedTemplate.url);
+
+      let rootPrefix = '';
+      const firstPath = allPaths[0];
+      if (firstPath && firstPath.includes('/')) {
+        const potentialRoot = firstPath.split('/')[0] + '/';
+        if (allPaths.every(p => p.startsWith(potentialRoot) || p === potentialRoot.slice(0, -1))) {
+          rootPrefix = potentialRoot;
+          console.log('Detected root prefix:', rootPrefix);
+        }
+      }
+
+      const templateName = selectedTemplate.url.split('/').pop();
+      const templateParent = selectedTemplate.url.split('/').slice(-2, -1)[0];
+      
+      const templatePathOptions = [
+        rootPrefix + selectedTemplate.url + '/',
+        rootPrefix + templateParent + '/' + templateName + '/',
+        rootPrefix + templateName + '/',
+        selectedTemplate.url + '/',
+        templateParent + '/' + templateName + '/',
+        templateName + '/'
+      ];
+
+      console.log('Testing paths:', templatePathOptions);
+
+      let foundPath = null;
+      for (const testPath of templatePathOptions) {
+        const matchingPaths = allPaths.filter(path => path.startsWith(testPath) && !contents.files[path].dir);
+        console.log(`Path "${testPath}": ${matchingPaths.length} files found`);
+        if (matchingPaths.length > 0) {
+          foundPath = testPath;
+          console.log('✓ Selected path:', testPath);
+          break;
+        }
+      }
+
+      if (!foundPath) {
+        console.error('Could not find template files. Available directories:');
+        const dirs = [...new Set(allPaths.map(p => p.split('/')[0]))];
+        console.error(dirs);
+        alert('Template files not found in ZIP. Check console for details.');
+        return;
+      }
+
+      const newFiles = {};
+      
+      for (const [path, zipEntry] of Object.entries(contents.files)) {
+        if (path.startsWith(foundPath) && !zipEntry.dir && !path.startsWith('__MACOSX')) {
+          const relativePath = path.substring(foundPath.length);
+          if (relativePath && !relativePath.startsWith('.modules/')) {
+            try {
+              const fileContent = await zipEntry.async('text');
+              newFiles[relativePath] = fileContent;
+              console.log('Loaded:', relativePath);
+            } catch (e) {
+              console.warn('Failed to load:', relativePath, e);
+            }
+          }
+        }
+      }
+
+      console.log('Total files loaded:', Object.keys(newFiles).length);
+
+      if (Object.keys(newFiles).length === 0) {
+        alert('No files found in template directory');
+        return;
+      }
+
+      setFiles(newFiles);
+      setVirtualItems({});
+      setZipName(selectedTemplate.name);
+      
+      const firstFile = Object.keys(newFiles)[0];
+      if (firstFile) {
+        setCurrentFile(firstFile);
+      }
+
+      const moduleInstructions = [];
+      for (const moduleName of selectedModules) {
+        const module = selectedTemplate.modules.find(m => m.name === moduleName);
+        if (module && module.path) {
+          const moduleFileName = module.path.split('/').pop();
+          console.log('Looking for module:', moduleName, '(' + moduleFileName + ')');
+          
+          let moduleFile = null;
+          for (const [path, file] of Object.entries(contents.files)) {
+            if (path.endsWith(moduleFileName) && !file.dir && path.includes('.modules')) {
+              moduleFile = file;
+              console.log('Found module at:', path);
+              break;
+            }
+          }
+
+          if (moduleFile) {
+            try {
+              const moduleContent = await moduleFile.async('text');
+              const moduleData = JSON.parse(moduleContent);
+              if (moduleData.instructions && Array.isArray(moduleData.instructions)) {
+                console.log(`✓ Loaded ${moduleData.instructions.length} instructions from ${moduleName}`);
+                moduleInstructions.push(...moduleData.instructions);
+              }
+            } catch (e) {
+              console.error('Error loading module', moduleName, ':', e);
+            }
+          } else {
+            console.warn('Module file not found:', moduleFileName);
+          }
+        }
+      }
+
+      moduleInstructions.sort((a, b) => {
+        const aPriority = a.priority || 999;
+        const bPriority = b.priority || 999;
+        return aPriority - bPriority;
+      });
+
+      console.log('✓ Total instructions loaded:', moduleInstructions.length);
+
+      setInstructions(moduleInstructions);
+      setShowTemplateModal(false);
+      setSelectedEnvironment(null);
+      setSelectedTemplate(null);
+      setSelectedModules([]);
+    } catch (error) {
+      console.error('Error details:', error);
+      alert('Error loading template: ' + error.message);
+    }
   };
  
   const handleClear = () => {
@@ -993,6 +1203,17 @@ const CodeEditor = () => {
                 Import ZIP
                 <S.FileInput type="file" accept=".zip" onChange={handleZipUpload} />
               </S.UploadLabel>
+              <S.UploadLabel>
+                <S.Icon style={{ marginRight: 8 }}>{ICONS.TEMPLATE}</S.Icon>
+                Load Templates
+                <S.FileInput type="file" accept=".zip" onChange={handleTemplateZipUpload} />
+              </S.UploadLabel>
+              {templateZipFile && (
+                <S.TemplateButton onClick={loadTemplatesJson}>
+                  <S.Icon style={{ marginRight: 8 }}>{ICONS.CHECK}</S.Icon>
+                  Select Template
+                </S.TemplateButton>
+              )}
               <S.UploadLabel as="a" href="/docs" style={{ textDecoration: 'none' }}>
                 <S.Icon style={{ marginRight: 8 }}>{ICONS.FILE}</S.Icon>
                 Docs
@@ -1193,6 +1414,85 @@ const CodeEditor = () => {
             </S.ContextMenuItem>
           )}
         </S.ContextMenu>
+      )}
+
+      {showTemplateModal && templatesData && (
+        <S.Modal onClick={() => setShowTemplateModal(false)}>
+          <S.ModalContent onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>Select Template</S.ModalTitle>
+              <S.CloseButton onClick={() => setShowTemplateModal(false)}>
+                <S.Icon style={{ fontSize: 20 }}>{ICONS.CLOSE}</S.Icon>
+              </S.CloseButton>
+            </S.ModalHeader>
+            <S.Form>
+              <S.Field>
+                <S.Label>Environment</S.Label>
+                <S.TemplateGrid>
+                  {Object.keys(templatesData).map(env => (
+                    <S.TemplateCard 
+                      key={env} 
+                      selected={selectedEnvironment === env}
+                      onClick={() => handleEnvironmentSelect(env)}
+                    >
+                      <S.TemplateCardTitle>{env.toUpperCase()}</S.TemplateCardTitle>
+                      <S.TemplateCardSubtitle>{templatesData[env].length} templates</S.TemplateCardSubtitle>
+                    </S.TemplateCard>
+                  ))}
+                </S.TemplateGrid>
+              </S.Field>
+
+              {selectedEnvironment && (
+                <S.Field>
+                  <S.Label>Template</S.Label>
+                  <S.TemplateGrid>
+                    {templatesData[selectedEnvironment].map(template => (
+                      <S.TemplateCard 
+                        key={template.name}
+                        selected={selectedTemplate?.name === template.name}
+                        onClick={() => handleTemplateSelect(template)}
+                      >
+                        <S.TemplateCardTitle>{template.name}</S.TemplateCardTitle>
+                        <S.TemplateCardDescription>{template.description}</S.TemplateCardDescription>
+                      </S.TemplateCard>
+                    ))}
+                  </S.TemplateGrid>
+                </S.Field>
+              )}
+
+              {selectedTemplate && selectedTemplate.modules && selectedTemplate.modules.length > 0 && (
+                <S.Field>
+                  <S.Label>Modules (optional)</S.Label>
+                  <S.ModulesList>
+                    {selectedTemplate.modules.map(module => (
+                      <S.ModuleItem 
+                        key={module.name}
+                        selected={selectedModules.includes(module.name)}
+                        onClick={() => toggleModule(module.name)}
+                      >
+                        <S.ModuleCheckbox selected={selectedModules.includes(module.name)}>
+                          {selectedModules.includes(module.name) && <S.Icon>{ICONS.CHECK}</S.Icon>}
+                        </S.ModuleCheckbox>
+                        <S.ModuleContent>
+                          <S.ModuleName>{module.name}</S.ModuleName>
+                          <S.ModuleDescription>{module.description}</S.ModuleDescription>
+                        </S.ModuleContent>
+                      </S.ModuleItem>
+                    ))}
+                  </S.ModulesList>
+                </S.Field>
+              )}
+            </S.Form>
+            <S.ButtonGroup>
+              <S.CancelButton onClick={() => setShowTemplateModal(false)}>
+                Cancel
+              </S.CancelButton>
+              <S.AddButton onClick={loadTemplateFiles} disabled={!selectedTemplate}>
+                Load Template
+              </S.AddButton>
+            </S.ButtonGroup>
+          </S.ModalContent>
+        </S.Modal>
       )}
 
       {showCreateModal && (
